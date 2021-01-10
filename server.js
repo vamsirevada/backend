@@ -25,7 +25,6 @@ mongoose
     process.exit(1);
   });
 
-const app = express();
 
 //endpoint
 app.get("/", (req, res) => res.send("API Running..."));
