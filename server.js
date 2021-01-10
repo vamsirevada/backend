@@ -27,7 +27,7 @@ mongoose
 
 
 //endpoint
-app.get("/", (req, res) => res.send("API Running..."));
+app.get("/api", (req, res) => res.send("API Running..."));
 
 //init middleware
 app.use(morgan("dev"));
