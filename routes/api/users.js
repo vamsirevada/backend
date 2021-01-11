@@ -49,7 +49,7 @@ router.post(
       if (!refferal) {
         res
           .status(400)
-          .json({ errors: [{ msg: "Refferral code dose not match" }] });
+          .json({ errors: [{ msg: "Refferral Code doesn't matched" }] });
       } else if (user) {
         return res
           .status(400)
@@ -125,51 +125,57 @@ router.post(
       password,
       userpermission,
       isGroup,
+      code,
     } = req.body;
 
     try {
       //See if user exists
       let user = await User.findOne({ email });
+      let referral = await Referral.findOne({ code });
+      console.log(referral, "referral");
 
-      if (user) {
+      if (!referral) {
+        res
+          .status(400)
+          .json({ errors: [{ msg: "Referral code doesn't macthed" }] });
+      } else if (user) {
         return res
           .status(400)
           .json({ errors: [{ msg: "User already exists" }] });
+      } else {
+        user = new User({
+          groupName,
+          userName,
+          email,
+          password,
+          userpermission,
+          isGroup,
+        });
+
+        //Encrypt password
+        const salt = await bcrypt.genSalt(10);
+
+        user.password = await bcrypt.hash(password, salt);
+
+        await user.save();
+
+        //Retrun jsonwebtoken
+        const payload = {
+          user: {
+            id: user.id,
+          },
+        };
+
+        jwt.sign(
+          payload,
+          process.env.JWT_SECRET,
+          { expiresIn: 360000 },
+          (err, token) => {
+            if (err) throw err;
+            res.json({ token });
+          }
+        );
       }
-
-      user = new User({
-        groupName,
-        userName,
-        email,
-        // avatar,
-        password,
-        userpermission,
-        isGroup,
-      });
-
-      //Encrypt password
-      const salt = await bcrypt.genSalt(10);
-
-      user.password = await bcrypt.hash(password, salt);
-
-      await user.save();
-
-      //Retrun jsonwebtoken
-      const payload = {
-        user: {
-          id: user.id,
-        },
-      };
-
-      jwt.sign(
-        payload,
-        process.env.JWT_SECRET,
-        { expiresIn: 360000 },
-        (err, token) => {
-          if (err) throw err;
-          res.json({ token });
-        }
-      );
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");

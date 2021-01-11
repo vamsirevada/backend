@@ -167,9 +167,15 @@ router.post("/send-referral", [], async (req, res) => {
   const emailData = {
     from: "noreply@node-react.com",
     to: email,
-    subject: "Referral Code",
+    subject: "Vanity | Social Networking site for M& E Industry",
     text: `Please use the following Code to Register:${code[0]} `,
-    html: `<p>Please use the following Code to Register:</p> <b>${code[0]}</b>`,
+    html: `<p>Hi,</p>
+    <p>Welcome to Vanity!!!</p>
+    <p>Vanity is an Professional networking platform for the Media &</p> <p>Entertainment community, with an aim to bring entertainment</p><p>industry professionals under one roof and facilitate them with</p><p> productive tools that will ensure success.</p><br/>
+    <p>We are very pleased that you’re becoming part of vanity family and</p><p>joining your friends and colleagues. We hope to cater your needs.</p> <br/> 
+    <p>Your Referral Code:</p><b>${code[0]}</b>
+    <p>Best Regards</p>
+    <h3>Team Vanity</h3>`,
   };
   try {
     const newCode = new Referral({
@@ -180,7 +186,55 @@ router.post("/send-referral", [], async (req, res) => {
 
     if (insert) {
       sendEmail(emailData);
-      res.json({ message: "code sent" });
+      res.json({
+        message: "Referral code sent to your email-id, Kindly check your email",
+      });
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.sattus(500).send("Server Error");
+  }
+});
+
+//@route POST /auth/send-invite
+//@desc  Auth user & get Token
+//@acess Public
+
+router.post("/send-invite", [], async (req, res) => {
+  const { email } = req.body;
+
+  const code = Generator.generate({
+    length: 6,
+    count: 1,
+  });
+
+  const emailData = {
+    from: "noreply@node-react.com",
+    to: email,
+    subject: "You have been invited to join Vanity",
+    text: `Please use the following Code to Register:${code[0]} `,
+    html: `<p>Hi,</p>
+   <p>Greetings from team vanity,</p>
+   <p>We are a Professional networking platform for the Media &</p> <p>Entertainment community, with an aim to bring entertainment</p> <p>industry professionals under one roof and facilitate them with</p> <p>productive tools that will ensure success.</p><br/>
+   <p>Your Friend/ Colleague has invited you to join vanity.</p><br/>
+   <a href="http://vanity.ac">Vanity Webiste</a><br/>
+   <p>Your Invite Code:</p><b>${code[0]}</b>
+   <p>Thank you</p>
+   <p>Best Regards</p>
+   <h3>Team Vanity</h3>`,
+  };
+  try {
+    const newCode = new Referral({
+      code: code[0],
+    });
+
+    const insert = await newCode.save();
+
+    if (insert) {
+      sendEmail(emailData);
+      res.json({
+        message: "Referral code sent to your email-id, Kindly check your email",
+      });
     }
   } catch (err) {
     console.error(err.message);
