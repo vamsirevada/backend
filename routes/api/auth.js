@@ -165,7 +165,7 @@ router.post("/send-referral", [], async (req, res) => {
   });
 
   const emailData = {
-    from: "noreply@node-react.com",
+    from: '"Vanity India" <admin@vanity.ac>',
     to: email,
     subject: "Vanity | Social Networking site for M& E Industry",
     text: `Please use the following Code to Register:${code[0]} `,
@@ -209,7 +209,7 @@ router.post("/send-invite", [], async (req, res) => {
   });
 
   const emailData = {
-    from: "noreply@node-react.com",
+    from: '"Vanity India" <admin@vanity.ac>',
     to: email,
     subject: "You have been invited to join Vanity",
     text: `Please use the following Code to Register:${code[0]} `,

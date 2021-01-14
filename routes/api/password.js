@@ -38,7 +38,7 @@ router.put(
       const token = jwt.sign(payload, process.env.JWT_SECRET);
 
       const emailData = {
-        from: "noreply@node-react.com",
+        from: '"Vanity Admin" <admin@vanity.ac>',
         to: email,
         subject: "Password Reset Instructions",
         text: `Please use the following link to reset your password: ${process.env.CLIENT_URL}/login/reset-password/${token}`,
