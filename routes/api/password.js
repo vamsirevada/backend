@@ -56,7 +56,7 @@ router.put(
         }
       });
     } catch (err) {
-      console.error();
+      console.error(err);
     }
   }
 );
