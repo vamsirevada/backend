@@ -5,12 +5,16 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const http = require("http");
+const server = http.createServer(app);
+const io = require("socket.io")(server);
 const dotenv = require("dotenv");
+const Chat = require("./models/Chat");
 
 dotenv.config();
 
 //Connect Database
-mongoose
+const connect = mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -25,6 +29,31 @@ mongoose
     process.exit(1);
   });
 
+io.on("connection", (socket) => {
+  console.log("New client connected");
+  socket.on("Input Chat Message", (msg) => {
+    connect.then((db) => {
+      try {
+        let chat = new Chat({
+          message: msg.chatMessage,
+          sender: msg.userId,
+          type: msg.type,
+        });
+
+        chat.save((err, doc) => {
+          if (err) return res.json({ success: false, err });
+          Chat.find({ _id: doc._id })
+            .populate("sender")
+            .exec((err, doc) => {
+              return io.emit("Output Chat Message", doc);
+            });
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  });
+});
 
 //endpoint
 app.get("/api", (req, res) => res.send("API Running...!"));
@@ -44,8 +73,9 @@ app.use("/api/profile", require("./routes/api/profile"));
 app.use("/api/posts", require("./routes/api/posts"));
 app.use("/api/article", require("./routes/api/article"));
 app.use("/api/password", require("./routes/api/password"));
+app.use("/api/chat", require("./routes/api/chat"));
 app.use("/api", require("./routes/api/search"));
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`Server Started on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server Started on port ${PORT}`));
