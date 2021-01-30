@@ -16,9 +16,7 @@ router.put(
     if (!req.body.email)
       return res.status(400).json({ message: "No Email in request body" });
 
-    console.log("forgot password finding user with that email");
     const { email } = req.body;
-    console.log("signin req.body", email);
     // find the user based on email
     try {
       const user = await User.findOne({ email });
@@ -61,41 +59,35 @@ router.put(
   }
 );
 
-router.put(
-  "/reset-password",
+router.put("/reset-password", async (req, res) => {
+  const { resetPasswordLink, newPassword } = req.body;
+  User.findOne({ resetPasswordLink }, async (err, user) => {
+    // if err or no user
+    if (err || !user)
+      return res.status("401").json({
+        error: "Invalid Link!",
+      });
 
-  async (req, res) => {
-    const { resetPasswordLink, newPassword } = req.body;
+    const salt = await bcrypt.genSalt(10);
 
-    User.findOne({ resetPasswordLink }, async (err, user) => {
-      // if err or no user
-      if (err || !user)
-        return res.status("401").json({
-          error: "Invalid Link!",
+    const updatepass = await bcrypt.hash(newPassword, salt);
+
+    const updatedFields = {
+      password: updatepass,
+      resetPasswordLink: "",
+    };
+    user = _.extend(user, updatedFields);
+    user.updated = Date.now();
+    user.save((err, result) => {
+      if (err) {
+        return res.status(400).json({
+          error: err,
         });
-
-      const salt = await bcrypt.genSalt(10);
-
-      const updatepass = await bcrypt.hash(newPassword, salt);
-
-      const updatedFields = {
-        password: updatepass,
-        resetPasswordLink: "",
-      };
-
-      user = _.extend(user, updatedFields);
-      user.updated = Date.now();
-      user.save((err, result) => {
-        if (err) {
-          return res.status(400).json({
-            error: err,
-          });
-        }
-        res.json({
-          message: `Great! Now you can login with your new password.`,
-        });
+      }
+      res.json({
+        message: `Great! Now you can login with your new password.`,
       });
     });
-  }
-);
+  });
+});
 module.exports = router;
