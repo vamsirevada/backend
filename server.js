@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const http = require("http");
 const server = http.createServer(app);
+const jwt = require("jsonwebtoken");
 const io = require("socket.io")(server);
 const dotenv = require("dotenv");
 const Chat = require("./models/Chat");
@@ -29,8 +30,10 @@ const connect = mongoose
     process.exit(1);
   });
 
+app.set("socket", io);
+
 io.on("connection", (socket) => {
-  console.log("New client connected");
+  console.log(`client connected at ${socket.id}`);
   socket.on("Input Chat Message", (msg) => {
     connect.then((db) => {
       try {

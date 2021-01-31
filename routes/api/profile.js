@@ -1592,7 +1592,6 @@ router.get("/buddyProfiles", auth, async (req, res) => {
     if (!profile) {
       return res.status(401).json({ msg: "You did not make your profile yet" });
     }
-
     const profiles = await Profile.find({
       user: { $in: profile.buddies },
     }).populate("user", ["fullName", "groupName", "userName"]);
@@ -1613,7 +1612,6 @@ router.get("/buddyProfiles/:id", auth, async (req, res) => {
     if (!profile) {
       return res.status(401).json({ msg: "You did not make your profile yet" });
     }
-
     const profiles = await Profile.find({
       user: { $in: profile.buddies },
     }).populate("user", ["fullName", "groupName", "userName"]);
