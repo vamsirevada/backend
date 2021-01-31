@@ -40,6 +40,7 @@ io.on("connection", (socket) => {
         let chat = new Chat({
           message: msg.chatMessage,
           sender: msg.userId,
+          reciever: msg.reciever,
           type: msg.type,
         });
 
@@ -47,7 +48,9 @@ io.on("connection", (socket) => {
           if (err) return res.json({ success: false, err });
           Chat.find({ _id: doc._id })
             .populate("sender")
+            .populate("reciever")
             .exec((err, doc) => {
+              console.log(doc);
               return io.emit("Output Chat Message", doc);
             });
         });
