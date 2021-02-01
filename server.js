@@ -7,10 +7,12 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const http = require("http");
 const server = http.createServer(app);
-const jwt = require("jsonwebtoken");
-const io = require("socket.io")(server);
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+  },
+});
 const dotenv = require("dotenv");
-const Chat = require("./models/Chat");
 
 dotenv.config();
 
@@ -30,10 +32,16 @@ const connect = mongoose
     process.exit(1);
   });
 
-app.set("socket", io);
+app.set("socketio", io);
 
 io.on("connection", (socket) => {
   console.log(`client connected at ${socket.id}`);
+  const roomId = socket.handshake.query;
+  console.log(roomId);
+  socket.join(roomId);
+  socket.on("newChatMessage", (data) => {
+    io.in(roomId).emit("newChatMessage", data);
+  });
   socket.on("Input Chat Message", (msg) => {
     connect.then((db) => {
       try {
@@ -43,7 +51,6 @@ io.on("connection", (socket) => {
           reciever: msg.reciever,
           type: msg.type,
         });
-
         chat.save((err, doc) => {
           if (err) return res.json({ success: false, err });
           Chat.find({ _id: doc._id })
