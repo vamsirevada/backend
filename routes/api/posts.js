@@ -139,7 +139,6 @@ router.delete("/:id", auth, async (req, res) => {
       " groupName",
       "avatar",
     ]);
-    console.log(post, "postpostpostpostpostpostpost");
     if (!post) {
       return res.status(404).json({ msg: "Post not found" });
     }

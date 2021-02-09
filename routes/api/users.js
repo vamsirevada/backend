@@ -82,8 +82,12 @@ router.post(
           process.env.JWT_SECRET,
           { expiresIn: 360000 },
           (err, token) => {
-            if (err) throw err;
-            res.json({ token });
+            if (err) {
+              throw err;
+            } else {
+              req.io.sockets.emit("user", user.email);
+              res.json({ token });
+            }
           }
         );
       }
@@ -172,6 +176,7 @@ router.post(
           { expiresIn: 360000 },
           (err, token) => {
             if (err) throw err;
+            req.io.sockets.emit("user", user.email);
             res.json({ token });
           }
         );
@@ -236,6 +241,7 @@ router.post(
         { expiresIn: 360000 },
         (err, token) => {
           if (err) throw err;
+          req.io.sockets.emit("user", user.email);
           res.json({ token });
         }
       );
