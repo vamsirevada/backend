@@ -37,20 +37,22 @@ router.post(
       email,
       password,
       userpermission,
-      code,
+      // code,
     } = req.body;
 
     try {
       //See if user exists
       let user = await User.findOne({ email });
-      let refferal = await Referral.findOne({ code });
-      console.log(refferal, "refferal");
+      // let refferal = await Referral.findOne({ code });
+      // console.log(refferal, "refferal");
 
-      if (!refferal) {
-        res
-          .status(400)
-          .json({ errors: [{ msg: "Refferral Code doesn't matched" }] });
-      } else if (user) {
+      // if (!refferal) {
+      //   res
+      //     .status(400)
+      //     .json({ errors: [{ msg: "Refferral Code doesn't matched" }] });
+      // } else
+
+      if (user) {
         return res
           .status(400)
           .json({ errors: [{ msg: "User already exists" }] });
@@ -129,20 +131,23 @@ router.post(
       password,
       userpermission,
       isGroup,
-      code,
+      // code,
     } = req.body;
 
     try {
       //See if user exists
       let user = await User.findOne({ email });
-      let referral = await Referral.findOne({ code });
-      console.log(referral, "referral");
+      // let referral = await Referral.findOne({ code });
+      // console.log(referral, "referral");
 
-      if (!referral) {
-        res
-          .status(400)
-          .json({ errors: [{ msg: "Referral code doesn't macthed" }] });
-      } else if (user) {
+      // if (!referral) {
+      //   res
+      //     .status(400)
+      //     .json({ errors: [{ msg: "Referral code doesn't macthed" }] });
+      // } else 
+      
+      
+      if (user) {
         return res
           .status(400)
           .json({ errors: [{ msg: "User already exists" }] });
