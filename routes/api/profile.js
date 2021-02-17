@@ -1622,4 +1622,73 @@ router.get('/buddyProfiles/:id', auth, async (req, res) => {
   }
 });
 
+// @route  PUT api/profile/notes/:note_id
+// @desc   note a person
+// @access Private
+router.put('/notes/:note_id', auth, async (req, res) => {
+  try {
+    // Get the users profile and check if it exists
+    const profile = await Profile.findOne({ user: req.user.id });
+    if (!profile) {
+      return res.status(401).json({ msg: 'You did not make your profile yet' });
+    }
+
+    // Get their profile and check if their profile exists
+    const noteProfile = await Profile.findById(req.params.note_id);
+    if (!noteProfile) {
+      return res
+        .status(404)
+        .json({ msg: 'Cannot add, their profile does not exist' });
+    }
+
+    //Check if the person is noted
+    // if (profile.notes.filter((note) => note === noteProfile.user).length > 0) {
+    //   return res.status(400).json({ msg: 'Already Noted' });
+    // }
+
+    // note a person save & return
+    // profile.requests.splice(removeIndex, 1);
+    profile.notes.unshift(noteProfile.user);
+    // noteProfile.notes.unshift(req.user.id);
+    // await noteProfile.save();
+    await profile.save();
+
+    res.json(profile.notes);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+//@route  PUT api/posts/unlike/:id
+//@desc   Unlike a post
+//@access Private
+router.put('/unlike/:id', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    //Check if the post is alredy been liked
+    if (
+      post.likes.filter((like) => like.user.toString() === req.user.id)
+        .length === 0
+    ) {
+      return res.status(400).json({ msg: 'Post has not yet been liked' });
+    }
+
+    //Get remove index
+    const removeIndex = post.likes
+      .map((like) => like.user.toString())
+      .indexOf(req.user.id);
+
+    post.likes.splice(removeIndex, 1);
+
+    await post.save();
+
+    res.json(post.likes);
+  } catch (err) {
+    console.error(err.message);
+    req.status(500).send('Server Error');
+  }
+});
+
 module.exports = router;

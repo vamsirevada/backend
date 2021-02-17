@@ -1,20 +1,24 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const ProfileSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user",
+    ref: 'user',
   },
   avatar: {
     type: String,
   },
   buddies: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: "user",
+    ref: 'user',
+  },
+  notes: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'user',
   },
   requests: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: "user",
+    ref: 'user',
   },
   location: {
     type: String,
@@ -223,4 +227,4 @@ const ProfileSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("profile", ProfileSchema);
+module.exports = mongoose.model('profile', ProfileSchema);
