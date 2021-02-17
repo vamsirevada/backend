@@ -23,6 +23,7 @@ router.post(
 
       const newPost = new Post({
         text: req.body.text,
+        title: req.body.title,
         url: req.body.url,
         type: req.body.type,
         fullName: user.fullName,
@@ -139,7 +140,6 @@ router.delete("/:id", auth, async (req, res) => {
       " groupName",
       "avatar",
     ]);
-    console.log(post, "postpostpostpostpostpostpost");
     if (!post) {
       return res.status(404).json({ msg: "Post not found" });
     }
