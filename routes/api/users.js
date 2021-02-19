@@ -1,27 +1,27 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { check, validationResult } = require("express-validator");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const User = require("../../models/User");
-const Writer = require("../../models/Writer");
-const Referral = require("../../models/Referral");
+const { check, validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../../models/User');
+const Writer = require('../../models/Writer');
+const Referral = require('../../models/Referral');
 
 //@route  POST api/users
 //@desc   Register user
 //@access Public
 router.post(
-  "/",
+  '/',
   [
-    check("fullName", "fullName is required").not().isEmpty(),
-    check("userName", "userName is required").exists(),
+    check('fullName', 'fullName is required').not().isEmpty(),
+    check('userName', 'userName is required').exists(),
     // check('userName', 'userName is required').not().isEmpty(),
-    check("email", "Please include a valid email").isEmail(),
+    check('email', 'Please include a valid email').isEmail(),
     check(
-      "password",
-      "Please enter a password with 6 or more characters"
+      'password',
+      'Please enter a password with 6 or more characters'
     ).isLength({ min: 6 }),
-    check("userpermission", "Please agree to Terms and condition").contains(
+    check('userpermission', 'Please agree to Terms and condition').contains(
       true
     ),
   ],
@@ -55,7 +55,7 @@ router.post(
       if (user) {
         return res
           .status(400)
-          .json({ errors: [{ msg: "User already exists" }] });
+          .json({ errors: [{ msg: 'User already exists' }] });
       } else {
         user = new User({
           fullName,
@@ -87,7 +87,6 @@ router.post(
             if (err) {
               throw err;
             } else {
-              req.io.sockets.emit("user", user.email);
               res.json({ token });
             }
           }
@@ -95,7 +94,7 @@ router.post(
       }
     } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).send('Server error');
     }
   }
 );
@@ -104,19 +103,19 @@ router.post(
 //@desc   Register A Group user
 //@access Public
 router.post(
-  "/group",
+  '/group',
   [
-    check("groupName", "Group Name is required").not().isEmpty(),
-    check("userName", "userName is required").not().isEmpty(),
-    check("email", "Please include a valid email").isEmail(),
+    check('groupName', 'Group Name is required').not().isEmpty(),
+    check('userName', 'userName is required').not().isEmpty(),
+    check('email', 'Please include a valid email').isEmail(),
     check(
-      "password",
-      "Please enter a password with 6 or more characters"
+      'password',
+      'Please enter a password with 6 or more characters'
     ).isLength({ min: 6 }),
-    check("userpermission", "Please agree to Terms and condition").contains(
+    check('userpermission', 'Please agree to Terms and condition').contains(
       true
     ),
-    check("isGroup", "Please select account type").contains(true),
+    check('isGroup', 'Please select account type').contains(true),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -144,13 +143,12 @@ router.post(
       //   res
       //     .status(400)
       //     .json({ errors: [{ msg: "Referral code doesn't macthed" }] });
-      // } else 
-      
-      
+      // } else
+
       if (user) {
         return res
           .status(400)
-          .json({ errors: [{ msg: "User already exists" }] });
+          .json({ errors: [{ msg: 'User already exists' }] });
       } else {
         user = new User({
           groupName,
@@ -181,14 +179,13 @@ router.post(
           { expiresIn: 360000 },
           (err, token) => {
             if (err) throw err;
-            req.io.sockets.emit("user", user.email);
             res.json({ token });
           }
         );
       }
     } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).send('Server error');
     }
   }
 );
@@ -198,13 +195,13 @@ router.post(
 //@acess Public
 
 router.post(
-  "/writer",
+  '/writer',
   [
-    check("name", "Please Add Name").not().isEmpty(),
-    check("email", "Please include a valid email").isEmail(),
+    check('name', 'Please Add Name').not().isEmpty(),
+    check('email', 'Please include a valid email').isEmail(),
     check(
-      "password",
-      "Please enter a password with 6 or more characters"
+      'password',
+      'Please enter a password with 6 or more characters'
     ).isLength({ min: 6 }),
   ],
   async (req, res) => {
@@ -218,7 +215,7 @@ router.post(
       //checking if user already exists by email
       let user = await Writer.findOne({ email });
       if (user) {
-        return res.status(400).json({ msg: "User already exists" });
+        return res.status(400).json({ msg: 'User already exists' });
       }
       //Createing new User
       user = new Writer({
@@ -246,13 +243,12 @@ router.post(
         { expiresIn: 360000 },
         (err, token) => {
           if (err) throw err;
-          req.io.sockets.emit("user", user.email);
           res.json({ token });
         }
       );
     } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server Error");
+      res.status(500).send('Server Error');
     }
   }
 );
