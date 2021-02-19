@@ -1715,16 +1715,15 @@ router.get('/notedpeople', auth, async (req, res) => {
       return res.status(401).json({ msg: 'You did not make your profile yet' });
     }
 
-    const xyz = profile.peoplenote[0].user;
+    const xyz = profile.peoplenote;
     console.log(xyz);
 
-    // xyz.forEach((num) => {
-    //   const output=[];
-
-    // });
+    const output = xyz.map((xyz) => xyz.user);
+    console.log(output);
 
     const profiles = await Profile.find({
-      user: { $in: profile.peoplenote[0].user },
+      // user: { $in: profile.peoplenote[0].user },
+      user: { $in: output },
     }).populate('user', ['fullName', 'groupName', 'userName']);
 
     res.json(profiles);
