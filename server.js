@@ -4,19 +4,12 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const http = require('http').createServer(app);
 
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
-http.listen(PORT, () => console.log(`Server Started on port ${PORT}`));
-
-const io = require('socket.io')(http, {
-  cors: {
-    origin: '*',
-  },
-});
+app.listen(PORT, () => console.log(`Server Started on port ${PORT}`));
 
 app.use(
   bodyParser.urlencoded({
@@ -43,11 +36,6 @@ mongoose
     console.error(err);
     process.exit(1);
   });
-
-app.use((req, res, next) => {
-  req.io = io;
-  next();
-});
 
 // Define routes
 app.use('/api/users', require('./routes/api/users'));
