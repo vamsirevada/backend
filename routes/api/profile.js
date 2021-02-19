@@ -1622,9 +1622,9 @@ router.get('/buddyProfiles/:id', auth, async (req, res) => {
 });
 
 // @route  PUT api/profile/notes/:note_id
-// @desc   note a person
+// @desc   note a person using profile id
 // @access Private
-router.put('/notes/:note_id', auth, async (req, res) => {
+router.put('/note/:note_id', auth, async (req, res) => {
   try {
     // Get the users profile and check if it exists
     const profile = await Profile.findOne({ user: req.user.id });
@@ -1637,56 +1637,91 @@ router.put('/notes/:note_id', auth, async (req, res) => {
     if (!noteProfile) {
       return res
         .status(404)
-        .json({ msg: 'Cannot add, their profile does not exist' });
+        .json({ msg: 'Cannot add, this profile does not exist' });
     }
 
-    //Check if the person is noted
-    // if (profile.notes.filter((note) => note === noteProfile.user).length > 0) {
-    //   return res.status(400).json({ msg: 'Already Noted' });
-    // }
+    const toUser = noteProfile.user._id;
+    const note = {
+      user: toUser,
+    };
 
+    /* Check if people is already noted*/
+    let noteIndex = profile.peoplenote
+      .map((notepeople) => notepeople.user)
+      .indexOf(toUser);
+    if (noteIndex > -1) {
+      return res.status(401).json({ msg: 'You noted this user' });
+    }
     // note a person save & return
-    // profile.requests.splice(removeIndex, 1);
-    profile.notes.unshift(noteProfile.user);
-    // noteProfile.notes.unshift(req.user.id);
-    // await noteProfile.save();
+    // profile.notepeople.unshift(noteProfile.user);
+    profile.peoplenote.unshift(note);
     await profile.save();
 
-    res.json(profile.notes);
+    res.json(profile.peoplenote);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
 });
 
-//@route  PUT api/posts/unlike/:id
-//@desc   Unlike a post
+//@route  PUT api/profile/unnote/:unnote_id
+//@desc   unnote people using profile.id
 //@access Private
-router.put('/unlike/:id', auth, async (req, res) => {
+router.delete('/unnote/:unnote_id', auth, async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
-
-    //Check if the post is alredy been liked
-    if (
-      post.likes.filter((like) => like.user.toString() === req.user.id)
-        .length === 0
-    ) {
-      return res.status(400).json({ msg: 'Post has not yet been liked' });
+    // Get the users profile and check if it exists
+    const profile = await Profile.findOne({ user: req.user.id });
+    if (!profile) {
+      return res.status(401).json({ msg: 'You did not make your profile yet' });
     }
 
+    // Get their profile and check if their profile exists
+    const noteProfile = await Profile.findById(req.params.unnote_id);
+    if (!noteProfile) {
+      return res
+        .status(404)
+        .json({ msg: 'Cannot add, this profile does not exist' });
+    }
+
+    const toUser = noteProfile.user._id;
+    console.log(toUser);
+
     //Get remove index
-    const removeIndex = post.likes
-      .map((like) => like.user.toString())
-      .indexOf(req.user.id);
 
-    post.likes.splice(removeIndex, 1);
+    const removeIndex = profile.peoplenote
+      .map((unnote) => unnote.id)
+      .indexOf(toUser);
 
-    await post.save();
+    profile.peoplenote.splice(removeIndex, 1);
 
-    res.json(post.likes);
+    await profile.save();
+
+    res.json(profile.peoplenote);
   } catch (err) {
     console.error(err.message);
     req.status(500).send('Server Error');
+  }
+});
+
+// @route  GET api/profile/notedpeople
+// @desc   Get the profiles of a user's noted people
+// @access Private
+router.get('/notedpeople', auth, async (req, res) => {
+  try {
+    // Get the user's profile and check if it exists
+    const profile = await Profile.findOne({ user: req.user.id });
+    if (!profile) {
+      return res.status(401).json({ msg: 'You did not make your profile yet' });
+    }
+
+    const profiles = await Profile.find({
+      user: { $in: profile.notepeople },
+    }).populate('user', ['fullName', 'groupName', 'userName']);
+
+    res.json(profiles);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
   }
 });
 

@@ -12,10 +12,14 @@ const ProfileSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: 'user',
   },
-  notes: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: 'user',
-  },
+  peoplenote: [
+    {
+      user: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'user',
+      },
+    },
+  ],
   requests: {
     type: [mongoose.Schema.Types.ObjectId],
     ref: 'user',
