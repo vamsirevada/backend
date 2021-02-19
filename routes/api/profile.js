@@ -1643,6 +1643,7 @@ router.put('/note/:note_id', auth, async (req, res) => {
     const toUser = noteProfile.user._id;
     const note = {
       user: toUser,
+      remark: req.body.remark,
     };
 
     /* Check if people is already noted*/
@@ -1714,8 +1715,11 @@ router.get('/notedpeople', auth, async (req, res) => {
       return res.status(401).json({ msg: 'You did not make your profile yet' });
     }
 
+    const xyz = profile.peoplenote;
+    console.log(xyz.user);
+
     const profiles = await Profile.find({
-      user: { $in: profile.notepeople },
+      user: { $in: profile.peoplenote.user },
     }).populate('user', ['fullName', 'groupName', 'userName']);
 
     res.json(profiles);

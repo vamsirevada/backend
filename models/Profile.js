@@ -15,8 +15,11 @@ const ProfileSchema = new mongoose.Schema({
   peoplenote: [
     {
       user: {
-        type: [mongoose.Schema.Types.ObjectId],
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
+      },
+      remark: {
+        type: String,
       },
     },
   ],
