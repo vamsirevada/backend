@@ -1,10 +1,10 @@
-const express = require("express");
+const express = require('express');
 const app = express();
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const http = require("http").createServer(app);
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const http = require('http').createServer(app);
 
 dotenv.config();
 
@@ -12,9 +12,9 @@ const PORT = process.env.PORT || 5000;
 
 http.listen(PORT, () => console.log(`Server Started on port ${PORT}`));
 
-const io = require("socket.io")(http, {
+const io = require('socket.io')(http, {
   cors: {
-    origin: "*",
+    origin: '*',
   },
 });
 
@@ -37,7 +37,7 @@ mongoose
     useFindAndModify: false,
   })
   .then(() => {
-    console.log("MongoDB Connected...");
+    console.log('MongoDB Connected...');
   })
   .catch((err) => {
     console.error(err);
@@ -50,14 +50,13 @@ app.use((req, res, next) => {
 });
 
 // Define routes
-app.use("/api/users", require("./routes/api/users"));
-app.use("/api/auth", require("./routes/api/auth"));
-app.use("/api/profile", require("./routes/api/profile"));
-app.use("/api/posts", require("./routes/api/posts"));
-app.use("/api/article", require("./routes/api/article"));
-app.use("/api/password", require("./routes/api/password"));
-app.use("/api/messages", require("./routes/api/chat"));
-app.use("/api", require("./routes/api/search"));
+app.use('/api/users', require('./routes/api/users'));
+app.use('/api/auth', require('./routes/api/auth'));
+app.use('/api/profile', require('./routes/api/profile'));
+app.use('/api/posts', require('./routes/api/posts'));
+app.use('/api/article', require('./routes/api/article'));
+app.use('/api/password', require('./routes/api/password'));
+app.use('/api', require('./routes/api/search'));
 
 //endpoint
-app.get("/api", (req, res) => res.send("API Running...!"));
+app.get('/api', (req, res) => res.send('API Running...!'));
