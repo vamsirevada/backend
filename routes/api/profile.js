@@ -1633,7 +1633,9 @@ router.put('/note/:note_id', auth, async (req, res) => {
     }
 
     // Get their profile and check if their profile exists
-    const noteProfile = await Profile.findById(req.params.note_id);
+    const noteProfile = await Profile.findById(
+      req.params.note_id
+    ).populate('user', ['fullName', 'groupName', 'userName']);
     if (!noteProfile) {
       return res
         .status(404)
@@ -1641,8 +1643,12 @@ router.put('/note/:note_id', auth, async (req, res) => {
     }
 
     const toUser = noteProfile.user._id;
+
     const note = {
       user: toUser,
+      fullName: noteProfile.user.fullName,
+      status: noteProfile.status,
+      avatar: noteProfile.avatar,
       remark: req.body.remark,
     };
 
@@ -1724,7 +1730,9 @@ router.get('/notedpeople', auth, async (req, res) => {
     const profiles = await Profile.find({
       // user: { $in: profile.peoplenote[0].user },
       user: { $in: output },
-    }).populate('user', ['fullName', 'groupName', 'userName']);
+    })
+      .populate('user', ['fullName', 'groupName', 'userName'])
+      .populate('profile', ['peoplenote.remark']);
 
     res.json(profiles);
   } catch (err) {

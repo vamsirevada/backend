@@ -18,6 +18,15 @@ const ProfileSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
       },
+      fullName: {
+        type: String,
+      },
+      status: {
+        type: String,
+      },
+      avatar: {
+        type: String,
+      },
       remark: {
         type: String,
       },
