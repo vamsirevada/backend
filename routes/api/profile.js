@@ -1454,7 +1454,6 @@ router.delete('/request/:profile_id', auth, async (req, res) => {
     const reqProfile = await Profile.findById(req.params.profile_id);
     const reqUser = reqProfile.user;
 
-    /* Check if the request exists */
     let removeIndex = profile.requests.indexOf(reqUser);
     if (removeIndex < 0) {
       return res
@@ -1672,7 +1671,7 @@ router.put('/note/:note_id', auth, async (req, res) => {
 });
 
 //@route  PUT api/profile/unnote/:unnote_id
-//@desc   unnote people using profile.id
+//@desc   unnote people using user id
 //@access Private
 router.delete('/unnote/:unnote_id', auth, async (req, res) => {
   try {
@@ -1683,21 +1682,31 @@ router.delete('/unnote/:unnote_id', auth, async (req, res) => {
     }
 
     // Get their profile and check if their profile exists
-    const noteProfile = await Profile.findById(req.params.unnote_id);
-    if (!noteProfile) {
-      return res
-        .status(404)
-        .json({ msg: 'Cannot add, this profile does not exist' });
-    }
+    // const noteProfile = await Profile.findById(req.params.unnote_id);
 
-    const toUser = noteProfile.user._id;
+    // if (!noteProfile) {
+    //   return res
+    //     .status(404)
+    //     .json({ msg: 'Cannot add, this profile does not exist' });
+    // }
+
+    // const toUser = noteProfile.user;
+    const toUser = req.params.unnote_id;
     console.log(toUser);
 
     //Get remove index
 
     const removeIndex = profile.peoplenote
-      .map((unnote) => unnote.id)
+      .map((unnote) => unnote.user)
       .indexOf(toUser);
+    // const removeIndex = profile.peoplenote.indexOf(toUser);
+    console.log(removeIndex);
+
+    if (removeIndex < 0) {
+      return res
+        .status(401)
+        .json({ msg: 'This user has not sent a request to you' });
+    }
 
     profile.peoplenote.splice(removeIndex, 1);
 
@@ -1722,10 +1731,10 @@ router.get('/notedpeople', auth, async (req, res) => {
     }
 
     const xyz = profile.peoplenote;
-    console.log(xyz);
+    // console.log(xyz);
 
     const output = xyz.map((xyz) => xyz.user);
-    console.log(output);
+    // console.log(output);
 
     const profiles = await Profile.find({
       // user: { $in: profile.peoplenote[0].user },
