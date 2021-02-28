@@ -59,7 +59,7 @@ router.get('/:user_id', auth, async (req, res) => {
     req.status(500).send('Server Error');
   }
 });
-//@route  GET api/project/1/:project_id
+//@route  GET api/project/single/:project_id
 //@desc   Get project by Project ID
 //@access Private
 
