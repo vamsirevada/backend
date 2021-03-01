@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../../middleware/auth');
 const { check, validationResult } = require('express-validator');
 const Profile = require('../../models/Profile');
+const Project = require('../../models/Project');
 const User = require('../../models/User');
 const Post = require('../../models/Post');
 
@@ -1472,7 +1473,7 @@ router.delete('/request/:profile_id', auth, async (req, res) => {
 });
 
 // @route  PUT api/profile/buddy/:buddy_id
-// @desc   Add buddy to profile
+// @desc   Add buddy to profile using buddy profiule id
 // @access Private
 router.put('/buddy/:buddy_id', auth, async (req, res) => {
   try {
@@ -1744,6 +1745,159 @@ router.get('/notedpeople', auth, async (req, res) => {
       .populate('profile', ['peoplenote.remark']);
 
     res.json(profiles);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route  GET api/profile/invites
+// @desc   Get project invites
+// @access Private
+router.get('/invites', auth, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ user: req.user.id });
+    if (!profile) {
+      return res
+        .status(404)
+        .json({ msg: 'You have not created your profile yet' });
+    }
+
+    res.json(profile.invites);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route  PUT api/profile/projectrequest/:project_id
+// @desc   Send a project request
+// @access Private
+router.put('/projectrequest/:project_id', auth, async (req, res) => {
+  try {
+    /* Pull out profile and check if it exists */
+    const fromProfile = await Profile.findOne({ user: req.user.id });
+    if (!fromProfile) {
+      return res
+        .status(404)
+        .json({ msg: 'You have not created a profile yet' });
+    }
+
+    const fromUser = await User.findById(fromProfile.user);
+
+    /* Pull out project theyre requesting to and check if it exists */
+    const toProject = await Project.findById(
+      req.params.project_id
+    ).populate('user', ['fullName', 'groupName', 'userName']);
+    if (!toProject) {
+      return res
+        .status(404)
+        .json({ msg: "The project you're requesting to does not exist" });
+    }
+    const toUser = toProject.user;
+
+    /* Check if he is member already */
+    let ProjectIndex = toProject.members
+      .map((member) => member.toString())
+      .indexOf(req.user.id);
+    if (ProjectIndex > -1) {
+      return res
+        .status(401)
+        .json({ msg: 'You are already member of this project' });
+    }
+
+    /* Check if the request was sent already */
+    let requestIndex = toProject.requests
+      .map((request) => request.toString())
+      .indexOf(req.user.id);
+    if (requestIndex > -1) {
+      return res
+        .status(401)
+        .json({ msg: 'You have already sent a project request' });
+    }
+
+    /* Send the request */
+    toProject.requests.unshift(req.user.id);
+    await toProject.save();
+
+    res.json({
+      msg: `Project request successfully sent to ${toProject.projectname}`,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route  PUT api/profile/invites/:user_id
+// @desc   Accept Project Invite
+// @access Private
+router.put('/invites/:user_id', auth, async (req, res) => {
+  try {
+    // Get the users profile and check if it exists
+    const profile = await Profile.findOne({ user: req.user.id });
+    if (!profile) {
+      return res.status(401).json({ msg: 'You did not make your profile yet' });
+    }
+
+    // Get project and check if it exists
+    const project = await Project.findOne({ user: req.params.user_id });
+    if (!project) {
+      return res
+        .status(404)
+        .json({ msg: 'Cannot add, project does not exist' });
+    }
+
+    // Check if the Project request was sent
+    let removeIndex = profile.invites.indexOf(req.params.user_id);
+    if (removeIndex < 0) {
+      return res
+        .status(401)
+        .json({ msg: 'They did not send a project request to you' });
+    }
+
+    // Add the new buddy, save & return
+    profile.invites.splice(removeIndex, 1);
+    profile.projects.unshift(project._id);
+    project.members.unshift(req.user.id);
+    await project.save();
+    await profile.save();
+
+    res.json(profile.projects);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route  DELETE api/profile/invite/:profile_id
+// @desc   Decline a project invite
+// @access Private
+router.delete('/invite/:profile_id', auth, async (req, res) => {
+  try {
+    /* Pull out the profile and check if it exists */
+    const profile = await Profile.findOne({ user: req.user.id });
+    if (!profile) {
+      return res
+        .status(404)
+        .json({ msg: 'You have not created a profile yet' });
+    }
+
+    /* Pull out their profile and get their user */
+    const reqProfile = await Profile.findById(req.params.profile_id);
+    const reqUser = reqProfile.user;
+
+    let removeIndex = profile.invites.indexOf(reqUser);
+    if (removeIndex < 0) {
+      return res
+        .status(401)
+        .json({ msg: 'This user has not sent you a project request' });
+    }
+
+    /* Remove the request and return */
+    profile.invites.splice(removeIndex, 1);
+    await profile.save();
+    res.json({ msg: 'Project invite is declined' });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');

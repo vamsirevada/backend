@@ -36,6 +36,14 @@ const ProfileSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: 'user',
   },
+  invites: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'user',
+  },
+  projects: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'project',
+  },
   location: {
     type: String,
   },

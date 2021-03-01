@@ -23,6 +23,10 @@ const ProjectSchema = new Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: 'user',
   },
+  requests: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'user',
+  },
   description: {
     type: String,
     required: true,
