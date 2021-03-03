@@ -66,7 +66,9 @@ router.get('/:user_id', auth, async (req, res) => {
 
 router.get('/single/:project_id', auth, async (req, res) => {
   try {
-    const project = await Project.findById(req.params.project_id);
+    const project = await Project.findById(
+      req.params.project_id
+    ).populate('user', ['fullName', 'groupName', 'userName']);
 
     if (!project) return res.status(400).json({ msg: 'Project Not Found' });
 
@@ -96,17 +98,17 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-// @route  PUT api/project/invites/:profile_id
-// @desc   Send a invites
+// @route  PUT api/project/invites/:project_id/:profile_id
+// @desc   Send a invites using profile id
 // @access Private
-router.put('/invites/:profile_id', auth, async (req, res) => {
+router.put('/invites/:project_id/:profile_id', auth, async (req, res) => {
   try {
     // Pull out project and check if it exists
-    const fromProject = await Project.findOne({ user: req.user.id });
+    const fromProject = await Project.findById(req.params.project_id);
     if (!fromProject) {
       return res
         .status(404)
-        .json({ msg: 'You have not created a profile yet' });
+        .json({ msg: 'You have not created a project yet' });
     }
 
     const fromUser = await User.findById(fromProject.user);
@@ -143,8 +145,14 @@ router.put('/invites/:profile_id', auth, async (req, res) => {
       return res.status(401).json({ msg: 'You have already sent an invite' });
     }
 
+    const xyz = {
+      invite: fromProject._id,
+      projectname: fromProject.projectname,
+    };
+
     /* Send the invites */
-    toProfile.invites.unshift(req.user.id);
+    // toProfile.invites.unshift(fromProject._id);
+    toProfile.invites.unshift(xyz);
     await toProfile.save();
 
     res.json({
@@ -173,19 +181,21 @@ router.get('/p/requests', auth, async (req, res) => {
   }
 });
 
-// @route  PUT api/project/member/:member_id
+// @route  PUT api/project/member/:project_id/:member_id
 // @desc   Accept member request using member profiule id
 // @access Private
-router.put('/member/:member_id', auth, async (req, res) => {
+router.put('/member/:project_id/:member_id', auth, async (req, res) => {
   try {
     // Get the users project and check if it exists
-    const project = await Project.findOne({ user: req.user.id });
+    const project = await Project.findById(req.params.project_id);
     if (!project) {
       return res.status(401).json({ msg: 'You did not make your project yet' });
     }
 
     // Get their profile and check if their profile exists
-    const memberProfile = await Profile.findById(req.params.member_id);
+    const memberProfile = await Profile.findById(
+      req.params.member_id
+    ).populate('user', ['fullName', 'groupName', 'userName']);
     if (!memberProfile) {
       return res
         .status(404)
@@ -193,17 +203,46 @@ router.put('/member/:member_id', auth, async (req, res) => {
     }
 
     // Check if the friend request was sent
-    let removeIndex = project.requests.indexOf(memberProfile.user);
+    let removeIndex = project.requests
+      .map((e) => e.request)
+      .indexOf(memberProfile._id);
+    console.log(memberProfile._id);
+    console.log(removeIndex);
     if (removeIndex < 0) {
       return res
         .status(401)
         .json({ msg: 'The user did not send a request to you' });
     }
 
+    const member = {
+      user: memberProfile.user,
+      fullName: memberProfile.user.fullName,
+      status: req.body.title,
+      avatar: memberProfile.avatar,
+    };
+
+    console.log(member);
+
+    const profileProject = {
+      project: project._id,
+      projectname: project.projectname,
+    };
+
+    const profileexp = {
+      title: req.body.title,
+      company: project.projectname,
+      location: project.location,
+      from: project.date,
+      description: project.description,
+    };
+
+    console.log(profileexp);
+
     // Add the new buddy, save & return
     project.requests.splice(removeIndex, 1);
-    project.members.unshift(memberProfile.user);
-    memberProfile.projects.unshift(project._id);
+    memberProfile.projects.unshift(profileProject);
+    memberProfile.experience.unshift(profileexp);
+    project.members.unshift(member);
     await memberProfile.save();
     await project.save();
 
@@ -214,13 +253,13 @@ router.put('/member/:member_id', auth, async (req, res) => {
   }
 });
 
-// @route  DELETE api/project/request/:memprofile_id
+// @route  DELETE api/project/request/:project_id/:memuser_id
 // @desc   Decline a member request
 // @access Private
-router.delete('/request/:memprofile_id', auth, async (req, res) => {
+router.delete('/request/:project_id/:memuser_id', auth, async (req, res) => {
   try {
     /* Pull out the profile and check if it exists */
-    const project = await Project.findOne({ user: req.user.id });
+    const project = await Project.findById(req.params.project_id);
     if (!project) {
       return res
         .status(404)
@@ -228,10 +267,12 @@ router.delete('/request/:memprofile_id', auth, async (req, res) => {
     }
 
     /* Pull out their profile and get their user */
-    const reqProfile = await Profile.findById(req.params.memprofile_id);
-    const reqUser = reqProfile.user;
+    // const reqProfile = await Profile.findById(req.params.memprofile_id);
+    // const reqUser = reqProfile.user;
 
-    let removeIndex = project.requests.indexOf(reqUser);
+    let removeIndex = project.requests
+      .map((e) => e.request)
+      .indexOf(req.params.memuser_id);
     if (removeIndex < 0) {
       return res
         .status(401)
@@ -252,24 +293,46 @@ router.delete('/request/:memprofile_id', auth, async (req, res) => {
 //@desc   Remove member using his user id
 //@access Private
 
-router.delete('/member/d/:memuser_id', auth, async (req, res) => {
+router.delete('/member/d/:project_id/:memuser_id', auth, async (req, res) => {
   try {
     /* Pull out the profile and check if it exists */
-    const project = await Project.findOne({ user: req.user.id });
+    const project = await Project.findById(req.params.project_id);
     if (!project) {
       return res
         .status(404)
         .json({ msg: 'You have not created a project yet' });
     }
 
-    let removeIndex = project.members.indexOf(req.params.memuser_id);
+    const profile = await Profile.findOne({ user: req.params.memuser_id });
+    if (!profile) {
+      return res.status(404).json({ msg: 'No Such profile exists' });
+    }
+
+    // let removeIndex = project.members.user.indexOf(req.params.memuser_id);
+
+    const removeIndex = project.members
+      .map((member) => member.user)
+      .indexOf(req.params.memuser_id);
+
     if (removeIndex < 0) {
+      return res.status(401).json({ msg: 'This user is not a member' });
+    }
+
+    const removeMemberIndex = profile.projects
+      .map((e) => e.project)
+      .indexOf(req.params.project_id);
+
+    if (removeMemberIndex < 0) {
       return res.status(401).json({ msg: 'This user is not a member' });
     }
 
     /* Remove the request and return */
     project.members.splice(removeIndex, 1);
+    profile.projects.splice(removeMemberIndex, 1);
     await project.save();
+    await profile.save();
+    res.json(project.members);
+    res.json(profile.projects);
     res.json({ msg: 'Member has been removed' });
   } catch (err) {
     console.error(err.message);

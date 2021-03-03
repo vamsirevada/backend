@@ -19,14 +19,44 @@ const ProjectSchema = new Schema({
   creator: {
     type: String,
   },
-  members: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: 'user',
-  },
-  requests: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: 'user',
-  },
+  // members: {
+  //   type: [mongoose.Schema.Types.ObjectId],
+  //   ref: 'user',
+  // },
+  members: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+      },
+      fullName: {
+        type: String,
+      },
+      status: {
+        type: String,
+      },
+      avatar: {
+        type: String,
+      },
+    },
+  ],
+  requests: [
+    {
+      request: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'profile',
+      },
+      fullName: {
+        type: String,
+      },
+      groupName: {
+        type: String,
+      },
+      userName: {
+        type: String,
+      },
+    },
+  ],
   description: {
     type: String,
     required: true,
