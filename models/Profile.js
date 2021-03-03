@@ -36,14 +36,32 @@ const ProfileSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: 'user',
   },
-  invites: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: 'user',
-  },
-  projects: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: 'project',
-  },
+  invites: [
+    {
+      invite: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'project',
+      },
+      projectname: {
+        type: String,
+      },
+    },
+  ],
+  // projects: {
+  //   type: [mongoose.Schema.Types.ObjectId],
+  //   ref: 'project',
+  // },
+  projects: [
+    {
+      project: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'project',
+      },
+      projectname: {
+        type: String,
+      },
+    },
+  ],
   location: {
     type: String,
   },

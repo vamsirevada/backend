@@ -1776,7 +1776,9 @@ router.get('/invites', auth, async (req, res) => {
 router.put('/projectrequest/:project_id', auth, async (req, res) => {
   try {
     /* Pull out profile and check if it exists */
-    const fromProfile = await Profile.findOne({ user: req.user.id });
+    const fromProfile = await Profile.findOne({
+      user: req.user.id,
+    }).populate('user', ['fullName', 'groupName', 'userName']);
     if (!fromProfile) {
       return res
         .status(404)
@@ -1798,7 +1800,7 @@ router.put('/projectrequest/:project_id', auth, async (req, res) => {
 
     /* Check if he is member already */
     let ProjectIndex = toProject.members
-      .map((member) => member.toString())
+      .map((member) => member.user)
       .indexOf(req.user.id);
     if (ProjectIndex > -1) {
       return res
@@ -1808,7 +1810,7 @@ router.put('/projectrequest/:project_id', auth, async (req, res) => {
 
     /* Check if the request was sent already */
     let requestIndex = toProject.requests
-      .map((request) => request.toString())
+      .map((e) => e.request)
       .indexOf(req.user.id);
     if (requestIndex > -1) {
       return res
@@ -1816,8 +1818,15 @@ router.put('/projectrequest/:project_id', auth, async (req, res) => {
         .json({ msg: 'You have already sent a project request' });
     }
 
+    const xyz = {
+      request: fromProfile._id,
+      firstName: fromProfile.user.firstName,
+      groupName: fromProfile.user.groupName,
+      userName: fromProfile.user.userName,
+    };
+
     /* Send the request */
-    toProject.requests.unshift(req.user.id);
+    toProject.requests.unshift(xyz);
     await toProject.save();
 
     res.json({
@@ -1829,19 +1838,21 @@ router.put('/projectrequest/:project_id', auth, async (req, res) => {
   }
 });
 
-// @route  PUT api/profile/invites/:user_id
+// @route  PUT api/profile/invites/:project_id
 // @desc   Accept Project Invite
 // @access Private
-router.put('/invites/:user_id', auth, async (req, res) => {
+router.put('/invites/:project_id', auth, async (req, res) => {
   try {
     // Get the users profile and check if it exists
-    const profile = await Profile.findOne({ user: req.user.id });
+    const profile = await Profile.findOne({
+      user: req.user.id,
+    }).populate('user', ['fullName', 'groupName', 'userName']);
     if (!profile) {
       return res.status(401).json({ msg: 'You did not make your profile yet' });
     }
 
     // Get project and check if it exists
-    const project = await Project.findOne({ user: req.params.user_id });
+    const project = await Project.findById(req.params.project_id);
     if (!project) {
       return res
         .status(404)
@@ -1849,17 +1860,47 @@ router.put('/invites/:user_id', auth, async (req, res) => {
     }
 
     // Check if the Project request was sent
-    let removeIndex = profile.invites.indexOf(req.params.user_id);
+    let removeIndex = profile.invites
+      .map((e) => e.invite)
+      .indexOf(req.params.project_id);
+    // console.log(res.params.project_id);
+
+    console.log(profile.invites);
+    console.log(removeIndex);
+
     if (removeIndex < 0) {
       return res
         .status(401)
         .json({ msg: 'They did not send a project request to you' });
     }
 
+    const member = {
+      user: profile.user,
+      fullName: profile.user.fullName,
+      status: req.body.title,
+      avatar: profile.avatar,
+    };
+
+    const profileProject = {
+      project: project._id,
+      projectname: project.projectname,
+    };
+
+    const profileexp = {
+      title: req.body.title,
+      company: project.projectname,
+      location: project.location,
+      from: project.date,
+      description: project.description,
+    };
+
+    console.log(member);
+
     // Add the new buddy, save & return
     profile.invites.splice(removeIndex, 1);
-    profile.projects.unshift(project._id);
-    project.members.unshift(req.user.id);
+    profile.projects.unshift(profileProject);
+    profile.experience.unshift(profileexp);
+    project.members.unshift(member);
     await project.save();
     await profile.save();
 
@@ -1870,10 +1911,10 @@ router.put('/invites/:user_id', auth, async (req, res) => {
   }
 });
 
-// @route  DELETE api/profile/invite/:profile_id
+// @route  DELETE api/profile/invite/:project_id
 // @desc   Decline a project invite
 // @access Private
-router.delete('/invite/:profile_id', auth, async (req, res) => {
+router.delete('/invite/:project_id', auth, async (req, res) => {
   try {
     /* Pull out the profile and check if it exists */
     const profile = await Profile.findOne({ user: req.user.id });
@@ -1884,10 +1925,12 @@ router.delete('/invite/:profile_id', auth, async (req, res) => {
     }
 
     /* Pull out their profile and get their user */
-    const reqProfile = await Profile.findById(req.params.profile_id);
-    const reqUser = reqProfile.user;
+    // const reqProfile = await Profile.findById(req.params.profile_id);
+    // const reqUser = reqProfile.user;
 
-    let removeIndex = profile.invites.indexOf(reqUser);
+    let removeIndex = profile.invites
+      .map((e) => e.invite)
+      .indexOf(req.params.project_id);
     if (removeIndex < 0) {
       return res
         .status(401)
