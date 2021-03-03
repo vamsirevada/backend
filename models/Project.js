@@ -27,6 +27,12 @@ const ProjectSchema = new Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: 'user',
   },
+  notices: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'notice',
+    },
+  ],
   description: {
     type: String,
     required: true,

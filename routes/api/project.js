@@ -5,6 +5,7 @@ const { check, validationResult } = require('express-validator');
 const Project = require('../../models/Project');
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
+const Notice = require('../../models/Notice');
 
 //@route  POST api/project
 //@desc   Create or update project
@@ -24,7 +25,7 @@ router.post(
       const newProject = new Project({
         projectname: req.body.projectname,
         location: req.body.location,
-        avatar: user.avatar,
+        avatar: req.body.avatar,
         description: req.body.description,
         creator: user.userName,
         user: req.user.id,
@@ -66,7 +67,9 @@ router.get('/:user_id', auth, async (req, res) => {
 
 router.get('/single/:project_id', auth, async (req, res) => {
   try {
-    const project = await Project.findById(req.params.project_id);
+    const project = await Project.findById(req.params.project_id).populate(
+      'notices'
+    );
 
     if (!project) return res.status(400).json({ msg: 'Project Not Found' });
 
