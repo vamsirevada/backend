@@ -197,8 +197,6 @@ router.put('/like/:id', auth, async (req, res) => {
 
     const postLikeBody = await User.findById(req.user.id).select('-password');
 
-    console.log(postLikeBody);
-
     const postLikes = {
       user: req.user.id,
       fullName: postLikeBody.fullName,
@@ -207,8 +205,6 @@ router.put('/like/:id', auth, async (req, res) => {
     };
 
     post.likes.unshift(postLikes);
-
-    const notification = await Notification;
 
     await post.save();
 
