@@ -5,6 +5,7 @@ const { check, validationResult } = require('express-validator');
 const Post = require('../../models/Post');
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
+const Notification = require('../../models/Notification');
 
 //@route  POST api/posts
 //@desc   Create a post
@@ -206,6 +207,8 @@ router.put('/like/:id', auth, async (req, res) => {
     };
 
     post.likes.unshift(postLikes);
+
+    const notification = await Notification;
 
     await post.save();
 
