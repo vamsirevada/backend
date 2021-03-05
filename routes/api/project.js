@@ -114,11 +114,6 @@ router.put('/invites/:project_id/:profile_id', auth, async (req, res) => {
 
     const fromUser = await User.findById(fromProject.user);
 
-    /* Check if its the same person */
-    if (fromProject._id.toString() === req.params.profile_id) {
-      return res.status(401).json({ msg: 'Lol thats you, what are you doing' });
-    }
-
     /* Pull out profile theyre requesting to and check if it exists */
     const toProfile = await Profile.findById(
       req.params.profile_id
@@ -130,6 +125,11 @@ router.put('/invites/:project_id/:profile_id', auth, async (req, res) => {
     }
     const toUser = toProfile.user._id;
 
+    /* Check if its the same person */
+    if (toUser._id.toString() === req.user.id) {
+      return res.status(401).json({ msg: 'Lol thats you, what are you doing' });
+    }
+
     /* Check if toUser is already member */
     let memberIndex = toProfile.projects
       .map((project) => project.toString())
@@ -140,8 +140,8 @@ router.put('/invites/:project_id/:profile_id', auth, async (req, res) => {
 
     /* Check if the invite was sent already */
     let inviteIndex = toProfile.invites
-      .map((invite) => invite.toString())
-      .indexOf(req.user.id);
+      .map((e) => e.invite)
+      .indexOf(req.params.project_id);
     if (inviteIndex > -1) {
       return res.status(401).json({ msg: 'You have already sent an invite' });
     }
