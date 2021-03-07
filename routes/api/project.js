@@ -132,7 +132,7 @@ router.put('/invites/:project_id/:profile_id', auth, async (req, res) => {
 
     /* Check if toUser is already member */
     let memberIndex = toProfile.projects
-      .map((project) => project.toString())
+      .map((e) => e.project)
       .indexOf(fromProject._id);
     if (memberIndex > -1) {
       return res.status(401).json({ msg: 'User is already a member' });
@@ -159,6 +159,50 @@ router.put('/invites/:project_id/:profile_id', auth, async (req, res) => {
     res.json({
       msg: `Project Invite successfully sent to ${toProfile.user.userName}`,
     });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route  DELETE api/invites/:project_id/:profile_id
+// @desc   Cancel Project Invite
+// @access Private
+router.delete('/invites/:project_id/:profile_id', auth, async (req, res) => {
+  try {
+    /* Pull out the profile and check if it exists */
+    const project = await Project.findById(req.params.project_id);
+    if (!project) {
+      return res
+        .status(404)
+        .json({ msg: 'You have not created a project yet' });
+    }
+
+    /* Pull out their profile and get their user */
+    const reqProfile = await Profile.findById(req.params.profile_id);
+    const reqUser = reqProfile.user;
+
+    /* Check if the invite was not sent */
+    let inviteIndex = reqProfile.invites
+      .map((e) => e.invite)
+      .indexOf(req.params.project_id);
+    if (inviteIndex < 0) {
+      return res.status(401).json({ msg: 'Project Invite not sent' });
+    }
+
+    let removeIndex = reqProfile.invites
+      .map((e) => e.invite)
+      .indexOf(req.params.project_id);
+    if (removeIndex < 0) {
+      return res
+        .status(401)
+        .json({ msg: 'This user has not sent a project request' });
+    }
+
+    /* Remove the request and return */
+    reqProfile.invites.splice(removeIndex, 1);
+    await reqProfile.save();
+    res.json({ msg: 'Project Invite has been cancelled' });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
