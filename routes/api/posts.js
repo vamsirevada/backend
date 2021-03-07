@@ -196,18 +196,14 @@ router.put('/like/:id', auth, async (req, res) => {
     }
 
     const postLikeBody = await User.findById(req.user.id).select('-password');
-
     const postLikes = {
       user: req.user.id,
       fullName: postLikeBody.fullName,
       avatar: postLikeBody.avatar,
       // displayLBtn: displayLBtn,
     };
-
     post.likes.unshift(postLikes);
-
     await post.save();
-
     res.json(post.likes);
   } catch (err) {
     console.error(err.message);
