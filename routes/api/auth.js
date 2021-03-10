@@ -1,26 +1,28 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const auth = require("../../middleware/auth");
-const User = require("../../models/User");
-const Referral = require("../../models/Referral");
-const Writer = require("../../models/Writer");
-const { sendEmail } = require("../../helpers");
-const Generator = require("../../helpers/referralCodegenerator");
+const auth = require('../../middleware/auth');
+const User = require('../../models/User');
+const Referral = require('../../models/Referral');
+const Writer = require('../../models/Writer');
+const { sendEmail } = require('../../helpers');
+const Generator = require('../../helpers/referralCodegenerator');
 
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const { check, validationResult } = require("express-validator");
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { check, validationResult } = require('express-validator');
 
 //@route  GET api/auth
 //@desc   get logged in users
 //@access Public
-router.get("/", auth, async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findByIdAndUpdate(req.user.id, {
+      $set: { activityStatus: 'online' },
+    }).select(-'password');
     res.json(user);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server Error");
+    res.status(500).send('Server Error');
   }
 });
 
@@ -28,13 +30,13 @@ router.get("/", auth, async (req, res) => {
 //@desc  Get logged in writer token
 //@acess Private
 
-router.get("/writer", auth, async (req, res) => {
+router.get('/writer', auth, async (req, res) => {
   try {
-    const user = await Writer.findById(req.user.id).select("-password");
+    const user = await Writer.findById(req.user.id).select('-password');
     res.json(user);
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ msg: "Server Error" });
+    res.status(500).json({ msg: 'Server Error' });
   }
 });
 
@@ -43,10 +45,10 @@ router.get("/writer", auth, async (req, res) => {
 //@access Public
 
 router.post(
-  "/",
+  '/',
   [
-    check("email", "Please include a valid email").isEmail(),
-    check("password", "Password is required").exists(),
+    check('email', 'Please include a valid email').isEmail(),
+    check('password', 'Password is required').exists(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -63,7 +65,7 @@ router.post(
       if (!user) {
         return res
           .status(400)
-          .json({ errors: [{ msg: "Invalid Credentials" }] });
+          .json({ errors: [{ msg: 'Invalid Credentials' }] });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
@@ -71,7 +73,7 @@ router.post(
       if (!isMatch) {
         return res
           .status(400)
-          .json({ errors: [{ msg: "Invalid Credentials" }] });
+          .json({ errors: [{ msg: 'Invalid Credentials' }] });
       }
 
       //Retrun jsonwebtoken
@@ -87,12 +89,13 @@ router.post(
         { expiresIn: 360000 },
         (err, token) => {
           if (err) throw err;
+          res.cookie('t', token);
           res.json({ token });
         }
       );
     } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).send('Server error');
     }
   }
 );
@@ -102,10 +105,10 @@ router.post(
 //@acess Public
 
 router.post(
-  "/writer",
+  '/writer',
   [
-    check("email", "please include a valid email").isEmail(),
-    check("password", "password is required").exists(),
+    check('email', 'please include a valid email').isEmail(),
+    check('password', 'password is required').exists(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -119,13 +122,13 @@ router.post(
       let user = await Writer.findOne({ email });
 
       if (!user) {
-        return res.status(400).json({ msg: "Invalid Credentials" });
+        return res.status(400).json({ msg: 'Invalid Credentials' });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        return res.status(400).json({ msg: "Invalid Credentials" });
+        return res.status(400).json({ msg: 'Invalid Credentials' });
       }
 
       //object that we wanna send to token
@@ -146,7 +149,7 @@ router.post(
       );
     } catch (err) {
       console.error(err.message);
-      res.sattus(500).send("Server Error");
+      res.sattus(500).send('Server Error');
     }
   }
 );
@@ -155,7 +158,7 @@ router.post(
 //@desc  Auth user & get Token
 //@acess Public
 
-router.post("/send-referral", [], async (req, res) => {
+router.post('/send-referral', [], async (req, res) => {
   const { email } = req.body;
 
   const code = Generator.generate({
@@ -166,7 +169,7 @@ router.post("/send-referral", [], async (req, res) => {
   const emailData = {
     from: `"Vanity India" ${process.env.EMAIL_USER}`,
     to: email,
-    subject: "Vanity | Social Networking site for M& E Industry",
+    subject: 'Vanity | Social Networking site for M& E Industry',
     text: `Please use the following Code to Register:${code[0]} `,
     html: `<p>Hi,</p>
     <p>Welcome to Vanity!!!</p>
@@ -186,12 +189,12 @@ router.post("/send-referral", [], async (req, res) => {
     if (insert) {
       sendEmail(emailData);
       res.json({
-        message: "Referral code sent to your email-id, Kindly check your email",
+        message: 'Referral code sent to your email-id, Kindly check your email',
       });
     }
   } catch (err) {
     console.error(err.message);
-    res.sattus(500).send("Server Error");
+    res.sattus(500).send('Server Error');
   }
 });
 
@@ -199,7 +202,7 @@ router.post("/send-referral", [], async (req, res) => {
 //@desc  Auth user & get Token
 //@acess Public
 
-router.post("/send-invite", [], async (req, res) => {
+router.post('/send-invite', [], async (req, res) => {
   const { email } = req.body;
 
   const code = Generator.generate({
@@ -210,7 +213,7 @@ router.post("/send-invite", [], async (req, res) => {
   const emailData = {
     from: `"Vanity India" ${process.env.EMAIL_USER}`,
     to: email,
-    subject: "You have been invited to join Vanity",
+    subject: 'You have been invited to join Vanity',
     text: `Please use the following Code to Register:${code[0]} `,
     html: `<p>Hi,</p>
    <p>Greetings from team vanity,</p>
@@ -232,12 +235,24 @@ router.post("/send-invite", [], async (req, res) => {
     if (insert) {
       sendEmail(emailData);
       res.json({
-        message: "Referral code sent to your email-id, Kindly check your email",
+        message: 'Referral code sent to your email-id, Kindly check your email',
       });
     }
   } catch (err) {
     console.error(err.message);
-    res.sattus(500).send("Server Error");
+    res.sattus(500).send('Server Error');
+  }
+});
+
+router.get('/signout', auth, async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user.id, {
+      $set: { activityStatus: 'offline' },
+    });
+    res.clearCookie('t');
+    res.json({ message: 'Signout success!' });
+  } catch (err) {
+    console.error(err.message);
   }
 });
 

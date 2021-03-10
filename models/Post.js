@@ -48,6 +48,10 @@ const PostSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'user',
       },
+      postId: {
+        type: Schema.Types.ObjectId,
+        ref: 'post',
+      },
       text: {
         type: String,
         required: true,

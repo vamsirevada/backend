@@ -263,6 +263,7 @@ router.post(
         userName: user.userName,
         avatar: user.avatar,
         user: req.user.id,
+        postId: req.params.id,
       };
 
       post.comments.unshift(newComment);
