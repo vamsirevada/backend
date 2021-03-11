@@ -50,7 +50,7 @@ const ProjectPostSchema = new Schema({
       },
       postId: {
         type: Schema.Types.ObjectId,
-        ref: 'post',
+        ref: 'projectpost',
       },
       text: {
         type: String,
