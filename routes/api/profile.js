@@ -1537,6 +1537,7 @@ router.delete('/buddy/:buddy_id', auth, async (req, res) => {
 
     // Unfriend the buddy, save & return
     profile.buddies.splice(removeIndex, 1);
+    buddyProfile.buddies.splice(removeIndex2, 1);
     await profile.save();
     res.json(profile.buddies);
   } catch (err) {

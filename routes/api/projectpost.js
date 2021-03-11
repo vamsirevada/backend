@@ -100,7 +100,7 @@ router.get('/:project_id', auth, async (req, res) => {
 });
 
 //@route  GET api/projectpost/user/:project_id
-//@desc   Get  all post of project using project id
+//@desc   Get  user post of project using project id
 //@access Private
 router.get('/user/:project_id', auth, async (req, res) => {
   try {
@@ -137,6 +137,25 @@ router.get('/user/:project_id', auth, async (req, res) => {
 
       res.json(userprojectpost);
     }
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'Post not found' });
+    }
+    req.status(500).send('Server Error');
+  }
+});
+
+//@route  GET api/projectpost/single/:post_id
+//@desc   Get post by id
+//@access Private
+router.get('/single/:post_id', auth, async (req, res) => {
+  try {
+    const projectpost = await ProjectPost.findById(req.params.post_id);
+    if (!projectpost) {
+      return res.status(404).json({ msg: 'Post not found' });
+    }
+    res.json(projectpost);
   } catch (err) {
     console.error(err.message);
     if (err.kind === 'ObjectId') {
