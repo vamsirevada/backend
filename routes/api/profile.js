@@ -1415,20 +1415,6 @@ router.put('/request/:profile_id', auth, async (req, res) => {
     /* Send the request */
     toProfile.requests.unshift(req.user.id);
     await toProfile.save();
-
-    // await pushNotification(
-    //   {
-    //     message: `You have recieved a study buddy request from ${fromUser.name}`,
-    //     profile: `${fromProfile._id}`,
-    //   },
-    //   toProfile._id
-    // );
-
-    // sendLivePush(
-    //   `${toUser.toString()}`,
-    //   `${fromUser.name} has sent you a buddy request`
-    // );
-
     res.json({
       msg: `Buddy request successfully sent to ${toProfile.user.userName}`,
     });
@@ -1506,7 +1492,7 @@ router.put('/buddy/:buddy_id', auth, async (req, res) => {
     await buddyProfile.save();
     await profile.save();
 
-    res.json(profile.buddies);
+    res.json(profile);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
