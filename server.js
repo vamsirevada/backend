@@ -42,6 +42,7 @@ app.use('/api/users', require('./routes/api/users'));
 app.use('/api/auth', require('./routes/api/auth'));
 app.use('/api/profile', require('./routes/api/profile'));
 app.use('/api/posts', require('./routes/api/posts'));
+app.use('/api/projectpost', require('./routes/api/projectpost'));
 app.use('/api/project', require('./routes/api/project'));
 app.use('/api/notice', require('./routes/api/notice'));
 app.use('/api/article', require('./routes/api/article'));

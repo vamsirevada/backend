@@ -22,6 +22,15 @@ router.post(
     try {
       const user = await User.findById(req.user.id).select('-password');
 
+      const profile = await Profile.findOne({ user: req.user.id });
+
+      const member = {
+        user: req.user.id,
+        fullName: user.fullName,
+        status: 'Admin',
+        avatar: profile.avatar,
+      };
+
       const newProject = new Project({
         projectname: req.body.projectname,
         location: req.body.location,
@@ -29,6 +38,7 @@ router.post(
         description: req.body.description,
         creator: user.userName,
         user: req.user.id,
+        members: member,
       });
 
       const project = await newProject.save();

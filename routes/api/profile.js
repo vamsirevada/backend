@@ -1947,4 +1947,22 @@ router.delete('/invite/:project_id', auth, async (req, res) => {
   }
 });
 
+//@route  GET api/profile
+//@desc   Get all profiles
+//@access Public
+
+router.get('/', auth, async (req, res) => {
+  try {
+    const profiles = await Profile.find().populate('user', [
+      'fullName',
+      'userName',
+      'groupName',
+    ]);
+    res.json(profiles);
+  } catch (err) {
+    console.error(err.message);
+    req.status(500).send('Server Error');
+  }
+});
+
 module.exports = router;
