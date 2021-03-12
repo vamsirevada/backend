@@ -4,8 +4,8 @@
   "description": "Social Networking Platform for Media & Entertainment",
   "main": "server.js",
   "engines": {
-    "node": "14.15.5",
-    "npm": "7.5.4"
+    "node": "^14.15.5",
+    "npm": "^7.5.4"
   },
   "scripts": {
     "start": "node server",

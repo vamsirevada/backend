@@ -47,12 +47,6 @@ const ProfileSchema = new mongoose.Schema({
       },
     },
   ],
-  notifications: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'notification',
-    },
-  ],
   projects: [
     {
       project: {
