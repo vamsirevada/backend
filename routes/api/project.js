@@ -57,8 +57,10 @@ router.post(
 router.get('/:user_id', auth, async (req, res) => {
   try {
     const project = await Project.find({
-      user: req.params.user_id,
-    }).populate('user', ['fullName', 'groupName', 'userName', 'isGroup']);
+      'members.user': req.params.user_id,
+    });
+
+    console.log(project);
 
     if (!project) return res.status(400).json({ msg: 'Project Not Found' });
 
