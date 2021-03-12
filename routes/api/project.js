@@ -60,8 +60,6 @@ router.get('/:user_id', auth, async (req, res) => {
       'members.user': req.params.user_id,
     });
 
-    console.log(project);
-
     if (!project) return res.status(400).json({ msg: 'Project Not Found' });
 
     res.json(project);
