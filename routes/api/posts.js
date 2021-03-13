@@ -261,6 +261,8 @@ router.post(
       const newComment = {
         text: req.body.text,
         userName: user.userName,
+        fullName: user.fullName,
+        groupName: user.groupName,
         avatar: user.avatar,
         user: req.user.id,
         postId: req.params.id,
