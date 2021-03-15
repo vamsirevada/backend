@@ -56,10 +56,13 @@ const PostSchema = new Schema({
         type: String,
         required: true,
       },
-      firstName: {
+      fullName: {
         type: String,
       },
-      lastName: {
+      groupName: {
+        type: String,
+      },
+      userName: {
         type: String,
       },
       avatar: {
