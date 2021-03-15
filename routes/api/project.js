@@ -5,7 +5,6 @@ const { check, validationResult } = require('express-validator');
 const Project = require('../../models/Project');
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
-const Notice = require('../../models/Notice');
 
 //@route  POST api/project
 //@desc   Create or update project
