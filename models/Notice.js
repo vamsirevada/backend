@@ -27,22 +27,15 @@ const NoticeSchema = new Schema({
   role: {
     type: String,
   },
-  applied: [
-    {
-      profile: {
-        type: Schema.Types.ObjectId,
-        ref: 'profile',
-      },
-    },
-  ],
-  shortlisted: [
-    {
-      profile: {
-        type: Schema.Types.ObjectId,
-        ref: 'profile',
-      },
-    },
-  ],
+  applied: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'profile',
+  },
+  shortlisted: {
+    type: [Schema.Types.ObjectId],
+    ref: 'profile',
+  },
+
   date: {
     type: Date,
     default: Date.now,

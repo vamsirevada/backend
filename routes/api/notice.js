@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const auth = require('../../middleware/auth');
 const Project = require('../../models/Project');
 const Notice = require('../../models/Notice');
+const Profile = require('../../models/Profile');
 
 //@route  POST api/notice/:project_id
 //@desc   Create or update notice
@@ -90,7 +91,7 @@ router.get('/single/:notice_id', auth, async (req, res) => {
   try {
     const notice = await Notice.findById(req.params.notice_id).populate(
       'project',
-      'projectname avatar'
+      'projectname avatar creator'
     );
 
     res.json(notice);
@@ -100,6 +101,103 @@ router.get('/single/:notice_id', auth, async (req, res) => {
       return res.status(400).json({ msg: 'Notice Not Found' });
     }
     req.status(500).send('Server Error');
+  }
+});
+
+// @route PUT api/notice/apply/:id
+// @desc Applying for Notice using Notice Id
+// @access Private
+
+router.put('/apply/:id', auth, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({
+      user: req.user.id,
+    }).populate('user', 'userName');
+
+    const notice = await Notice.findById(req.params.id).populate(
+      'project',
+      'creator'
+    );
+
+    const creator = notice.project.creator;
+
+    if (creator === profile.user.userName) {
+      return res.status(401).json({
+        msg: 'You are the creator of this notice',
+      });
+    }
+
+    let appliedIndex = notice.applied
+      .map((x) => x.toString())
+      .indexOf(profile._id);
+
+    if (appliedIndex > -1) {
+      return res.status(401).json({ msg: 'You have already applied' });
+    }
+    notice.applied.unshift(profile);
+    await notice.save();
+    res.json(notice);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route PUT api/notice/shortlist/:id/:profile_id
+// @desc Shortlisting for Notice using Notice Id and Profile Id
+// @access Private
+
+router.put('/shortlist/:id/:profile_id', auth, async (req, res) => {
+  try {
+    const notice = await Notice.findById(req.params.id);
+
+    const profile = await Profile.findById(req.params.profile_id);
+
+    let removeIndex = notice.applied.indexOf(profile._id);
+
+    notice.applied.splice(removeIndex, 1);
+    notice.shortlisted.unshift(profile);
+    await notice.save();
+    res.json(notice);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route GET api/notice/applied/:id
+// @desc Getting Applied members using Notice Id
+// @access Private
+
+router.get('/applied/:id', auth, async (req, res) => {
+  try {
+    const notice = await Notice.findById(req.params.id);
+
+    const profiles = await Profile.find({
+      _id: { $in: notice.applied },
+    });
+    res.json(profiles);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route GET api/notice/shortlisted/:id
+// @desc Getting Shortlisted members using Notice Id
+// @access Private
+
+router.get('/shortlisted/:id', auth, async (req, res) => {
+  try {
+    const notice = await Notice.findById(req.params.id);
+
+    const profiles = await Profile.find({
+      _id: { $in: notice.shortlisted },
+    });
+    res.json(profiles);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
   }
 });
 
