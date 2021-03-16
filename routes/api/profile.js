@@ -1668,27 +1668,13 @@ router.delete('/unnote/:unnote_id', auth, async (req, res) => {
     if (!profile) {
       return res.status(401).json({ msg: 'You did not make your profile yet' });
     }
-
-    // Get their profile and check if their profile exists
-    // const noteProfile = await Profile.findById(req.params.unnote_id);
-
-    // if (!noteProfile) {
-    //   return res
-    //     .status(404)
-    //     .json({ msg: 'Cannot add, this profile does not exist' });
-    // }
-
-    // const toUser = noteProfile.user;
     const toUser = req.params.unnote_id;
-    console.log(toUser);
 
     //Get remove index
 
     const removeIndex = profile.peoplenote
       .map((unnote) => unnote.user)
       .indexOf(toUser);
-    // const removeIndex = profile.peoplenote.indexOf(toUser);
-    console.log(removeIndex);
 
     if (removeIndex < 0) {
       return res
@@ -1708,7 +1694,7 @@ router.delete('/unnote/:unnote_id', auth, async (req, res) => {
 });
 
 // @route  GET api/profile/notedpeople
-// @desc   Get the profiles of a user's noted people
+// @desc   Get all noted people of user
 // @access Private
 router.get('/notedpeople', auth, async (req, res) => {
   try {
@@ -1719,26 +1705,15 @@ router.get('/notedpeople', auth, async (req, res) => {
     }
 
     const xyz = profile.peoplenote;
-    // console.log(xyz);
 
-    const output = xyz.map((xyz) => xyz.user);
-    // console.log(output);
-
-    const profiles = await Profile.find({
-      // user: { $in: profile.peoplenote[0].user },
-      user: { $in: output },
-    })
-      .populate('user', ['fullName', 'groupName', 'userName'])
-      .populate('profile', ['peoplenote.remark']);
-
-    res.json(profiles);
+    res.json(xyz);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 });
 
-// @route  PUT api/profile/notes/post/:post_id
+// @route  PUT api/profile/note/post/:post_id
 // @desc   note a post using post id
 // @access Private
 router.put('/note/post/:post_id', auth, async (req, res) => {
@@ -1750,11 +1725,7 @@ router.put('/note/post/:post_id', auth, async (req, res) => {
     }
 
     // Get their profile and check if their profile exists
-    const notePost = await Post.findById(req.params.post_id).populate('user', [
-      'fullName',
-      'groupName',
-      'userName',
-    ]);
+    const notePost = await Post.findById(req.params.post_id);
     if (!notePost) {
       return res
         .status(404)
@@ -1768,8 +1739,8 @@ router.put('/note/post/:post_id', auth, async (req, res) => {
     const note = {
       user: toUser,
       post: req.params.post_id,
-      fullName: notePost.user.fullName,
-      groupName: notePost.user.groupName,
+      fullName: notePost.fullName,
+      groupName: notePost.groupName,
       status: notePost.status,
       avatar: notePost.avatar,
       remark: req.body.remark,
@@ -1783,14 +1754,70 @@ router.put('/note/post/:post_id', auth, async (req, res) => {
       return res.status(401).json({ msg: 'You noted this post' });
     }
     // note a person save & return
-    // profile.notepeople.unshift(noteProfile.user);
+
     profile.postnote.unshift(note);
     await profile.save();
 
-    res.json(profile.postnote);
+    res.json(profile);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
+  }
+});
+
+//@route  PUT api/profile/unnote/post/:post_id
+//@desc   unnote post using post id
+//@access Private
+router.delete('/unnote/post/:post_id', auth, async (req, res) => {
+  try {
+    // Get the users profile and check if it exists
+    const profile = await Profile.findOne({ user: req.user.id });
+    if (!profile) {
+      return res.status(401).json({ msg: 'You did not make your profile yet' });
+    }
+
+    const toPost = req.params.post_id;
+
+    //Get remove index
+
+    const removeIndex = profile.postnote
+      .map((unnote) => unnote.post)
+      .indexOf(toPost);
+
+    if (removeIndex < 0) {
+      return res
+        .status(401)
+        .json({ msg: 'This user has not sent a request to you' });
+    }
+
+    profile.postnote.splice(removeIndex, 1);
+
+    await profile.save();
+
+    res.json(profile);
+  } catch (err) {
+    console.error(err.message);
+    req.status(500).send('Server Error');
+  }
+});
+
+// @route  GET api/profile/notedpost
+// @desc   Get the all noted post of user
+// @access Private
+router.get('/notedpost', auth, async (req, res) => {
+  try {
+    // Get the user's profile and check if it exists
+    const profile = await Profile.findOne({ user: req.user.id });
+    if (!profile) {
+      return res.status(401).json({ msg: 'You did not make your profile yet' });
+    }
+
+    const xyz = profile.postnote;
+
+    res.json(xyz);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
   }
 });
 
