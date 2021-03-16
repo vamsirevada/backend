@@ -1738,6 +1738,62 @@ router.get('/notedpeople', auth, async (req, res) => {
   }
 });
 
+// @route  PUT api/profile/notes/post/:post_id
+// @desc   note a post using post id
+// @access Private
+router.put('/note/post/:post_id', auth, async (req, res) => {
+  try {
+    // Get the users profile and check if it exists
+    const profile = await Profile.findOne({ user: req.user.id });
+    if (!profile) {
+      return res.status(401).json({ msg: 'You did not make your profile yet' });
+    }
+
+    // Get their profile and check if their profile exists
+    const notePost = await Post.findById(req.params.post_id).populate('user', [
+      'fullName',
+      'groupName',
+      'userName',
+    ]);
+    if (!notePost) {
+      return res
+        .status(404)
+        .json({ msg: 'Cannot add, this post does not exist' });
+    }
+
+    console.log(notePost);
+
+    const toUser = notePost.user._id;
+
+    const note = {
+      user: toUser,
+      post: req.params.post_id,
+      fullName: notePost.user.fullName,
+      groupName: notePost.user.groupName,
+      status: notePost.status,
+      avatar: notePost.avatar,
+      remark: req.body.remark,
+    };
+
+    /* Check if people is already noted*/
+    let noteIndex = profile.postnote
+      .map((notepost) => notepost.post)
+      .indexOf(req.params.post_id);
+    if (noteIndex > -1) {
+      return res.status(401).json({ msg: 'You noted this post' });
+    }
+    // note a person save & return
+    // profile.notepeople.unshift(noteProfile.user);
+    profile.postnote.unshift(note);
+    await profile.save();
+
+    res.json(profile.postnote);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
 // @route  GET api/profile/invites
 // @desc   Get project invites
 // @access Private

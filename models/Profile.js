@@ -32,6 +32,33 @@ const ProfileSchema = new mongoose.Schema({
       },
     },
   ],
+  postnote: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+      },
+      post: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'post',
+      },
+      fullName: {
+        type: String,
+      },
+      groupName: {
+        type: String,
+      },
+      status: {
+        type: String,
+      },
+      avatar: {
+        type: String,
+      },
+      remark: {
+        type: String,
+      },
+    },
+  ],
   requests: {
     type: [mongoose.Schema.Types.ObjectId],
     ref: 'user',
