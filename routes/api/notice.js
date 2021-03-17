@@ -114,6 +114,10 @@ router.put('/apply/:id', auth, async (req, res) => {
       user: req.user.id,
     }).populate('user', 'userName');
 
+    if (!profile) {
+      return res.status(401).json({ msg: 'You did not make your profile yet' });
+    }
+
     const notice = await Notice.findById(req.params.id).populate(
       'project',
       'creator'
