@@ -71,7 +71,10 @@ router.get('/', auth, async (req, res) => {
       project: {
         $in: project_id,
       },
-    }).populate('project', ['projectname']);
+    })
+      .populate('project', ['projectname'])
+      .populate('applied', ['avatar'])
+      .populate('shortlisted', ['avatar']);
 
     res.json(notice);
   } catch (err) {
