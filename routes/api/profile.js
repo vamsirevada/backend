@@ -1629,6 +1629,14 @@ router.put('/note/:profile_id', auth, async (req, res) => {
         .json({ msg: 'Cannot add, this profile does not exist' });
     }
 
+    /* Check if people is already noted*/
+    let noteIndex = profile.peoplenote
+      .map((notepeople) => notepeople.user)
+      .indexOf(toUser);
+    if (noteIndex > -1) {
+      return res.status(401).json({ msg: 'You noted this user' });
+    }
+
     const toUser = noteProfile.user._id;
 
     const note = {
@@ -1639,13 +1647,6 @@ router.put('/note/:profile_id', auth, async (req, res) => {
       remark: req.body.remark,
     };
 
-    /* Check if people is already noted*/
-    let noteIndex = profile.peoplenote
-      .map((notepeople) => notepeople.user)
-      .indexOf(toUser);
-    if (noteIndex > -1) {
-      return res.status(401).json({ msg: 'You noted this user' });
-    }
     // note a person save & return
     // profile.notepeople.unshift(noteProfile.user);
     profile.peoplenote.unshift(note);
@@ -1670,8 +1671,15 @@ router.delete('/unnote/:user_id', auth, async (req, res) => {
     }
     const toUser = req.params.user_id;
 
-    //Get remove index
+    /* Check if people is already noted*/
+    let noteIndex = profile.peoplenote
+      .map((notepeople) => notepeople.user)
+      .indexOf(toUser);
+    if (noteIndex > -1) {
+      return res.status(401).json({ msg: 'You noted this user' });
+    }
 
+    //Get remove index
     const removeIndex = profile.peoplenote
       .map((unnote) => unnote.user)
       .indexOf(toUser);
@@ -1730,7 +1738,7 @@ router.put(
           .json({ msg: 'You did not make your profile yet' });
       }
 
-      // Get their profile and check if their profile exists
+      // Get their post and check if their profile exists
       const notePost = await Post.findById(req.params.post_id);
       if (!notePost) {
         return res
@@ -1739,6 +1747,14 @@ router.put(
       }
 
       const toUser = notePost.user._id;
+
+      /* Check if people is already noted*/
+      let noteIndex = profile.postnote
+        .map((notepost) => notepost.post)
+        .indexOf(req.params.post_id);
+      if (noteIndex > -1) {
+        return res.status(401).json({ msg: 'You noted this post' });
+      }
 
       const note = {
         user: toUser,
@@ -1750,13 +1766,6 @@ router.put(
         remark: req.body.remark,
       };
 
-      /* Check if people is already noted*/
-      let noteIndex = profile.postnote
-        .map((notepost) => notepost.post)
-        .indexOf(req.params.post_id);
-      if (noteIndex > -1) {
-        return res.status(401).json({ msg: 'You noted this post' });
-      }
       // note a person save & return
 
       profile.postnote.unshift(note);
@@ -1782,6 +1791,14 @@ router.delete('/unnote/post/:post_id', auth, async (req, res) => {
     }
 
     const toPost = req.params.post_id;
+
+    /* Check if post is noted*/
+    let noteIndex = profile.postnote
+      .map((notepost) => notepost.post)
+      .indexOf(req.params.post_id);
+    if (noteIndex > -1) {
+      return res.status(401).json({ msg: 'You noted this post' });
+    }
 
     //Get remove index
 
