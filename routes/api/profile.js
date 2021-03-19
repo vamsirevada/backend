@@ -1608,10 +1608,10 @@ router.get('/buddyProfiles/:id', auth, async (req, res) => {
   }
 });
 
-// @route  PUT api/profile/notes/:note_id
+// @route  PUT api/profile/notes/:profile_id
 // @desc   note a person using profile id
 // @access Private
-router.put('/note/:note_id', auth, async (req, res) => {
+router.put('/note/:profile_id', auth, async (req, res) => {
   try {
     // Get the users profile and check if it exists
     const profile = await Profile.findOne({ user: req.user.id });
@@ -1621,7 +1621,7 @@ router.put('/note/:note_id', auth, async (req, res) => {
 
     // Get their profile and check if their profile exists
     const noteProfile = await Profile.findById(
-      req.params.note_id
+      req.params.profile_id
     ).populate('user', ['fullName', 'groupName', 'userName']);
     if (!noteProfile) {
       return res
@@ -1651,24 +1651,24 @@ router.put('/note/:note_id', auth, async (req, res) => {
     profile.peoplenote.unshift(note);
     await profile.save();
 
-    res.json(profile.peoplenote);
+    res.json(profile);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
 });
 
-//@route  PUT api/profile/unnote/:unnote_id
+//@route  PUT api/profile/unnote/:user_id
 //@desc   unnote people using user id
 //@access Private
-router.delete('/unnote/:unnote_id', auth, async (req, res) => {
+router.delete('/unnote/:user_id', auth, async (req, res) => {
   try {
     // Get the users profile and check if it exists
     const profile = await Profile.findOne({ user: req.user.id });
     if (!profile) {
       return res.status(401).json({ msg: 'You did not make your profile yet' });
     }
-    const toUser = req.params.unnote_id;
+    const toUser = req.params.user_id;
 
     //Get remove index
 
@@ -1686,7 +1686,7 @@ router.delete('/unnote/:unnote_id', auth, async (req, res) => {
 
     await profile.save();
 
-    res.json(profile.peoplenote);
+    res.json(profile);
   } catch (err) {
     console.error(err.message);
     req.status(500).send('Server Error');
@@ -1737,8 +1737,6 @@ router.put(
           .status(404)
           .json({ msg: 'Cannot add, this post does not exist' });
       }
-
-      console.log(notePost);
 
       const toUser = notePost.user._id;
 
