@@ -260,8 +260,8 @@ router.put('/member/:project_id/:member_id', auth, async (req, res) => {
     let removeIndex = project.requests
       .map((e) => e.request)
       .indexOf(memberProfile._id);
-    console.log(memberProfile._id);
-    console.log(removeIndex);
+    // console.log(memberProfile._id);
+    // console.log(removeIndex);
     if (removeIndex < 0) {
       return res
         .status(401)
@@ -275,7 +275,7 @@ router.put('/member/:project_id/:member_id', auth, async (req, res) => {
       avatar: memberProfile.avatar,
     };
 
-    console.log(member);
+    // console.log(member);
 
     const profileProject = {
       project: project._id,
@@ -290,7 +290,7 @@ router.put('/member/:project_id/:member_id', auth, async (req, res) => {
       description: project.description,
     };
 
-    console.log(profileexp);
+    // console.log(profileexp);
 
     // Add the new buddy, save & return
     project.requests.splice(removeIndex, 1);

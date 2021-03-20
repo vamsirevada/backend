@@ -1957,8 +1957,8 @@ router.put('/invites/:project_id', auth, async (req, res) => {
       .indexOf(req.params.project_id);
     // console.log(res.params.project_id);
 
-    console.log(profile.invites);
-    console.log(removeIndex);
+    // console.log(profile.invites);
+    // console.log(removeIndex);
 
     if (removeIndex < 0) {
       return res
@@ -1986,7 +1986,7 @@ router.put('/invites/:project_id', auth, async (req, res) => {
       description: project.description,
     };
 
-    console.log(member);
+    // console.log(member);
 
     // Add the new buddy, save & return
     profile.invites.splice(removeIndex, 1);

@@ -30,7 +30,7 @@ router.post(
       const userExist = project.members
         .map((member) => member.user)
         .indexOf(req.user.id);
-      console.log(userExist);
+      // console.log(userExist);
       if (userExist < 0) {
         return res.status(401).json({
           msg:
@@ -74,7 +74,7 @@ router.get('/:project_id', auth, async (req, res) => {
     const userExist = project.members
       .map((member) => member.user)
       .indexOf(req.user.id);
-    console.log(userExist);
+    // console.log(userExist);
     if (userExist < 0) {
       return res.status(401).json({
         msg:
