@@ -38,6 +38,7 @@ router.post(
         creator: user.userName,
         user: req.user.id,
         members: member,
+        admin: member,
       });
 
       const project = await newProject.save();
@@ -362,7 +363,11 @@ router.delete('/member/d/:project_id/:memuser_id', auth, async (req, res) => {
       return res.status(404).json({ msg: 'No Such profile exists' });
     }
 
-    // let removeIndex = project.members.user.indexOf(req.params.memuser_id);
+    /* Check if the reqUser admin */
+    let adminIndex = project.admin.map((e) => e.user).indexOf(req.user.id);
+    if (adminIndex < 0) {
+      return res.status(401).json({ msg: 'Youre not authorised' });
+    }
 
     const removeIndex = project.members
       .map((member) => member.user)
@@ -393,5 +398,195 @@ router.delete('/member/d/:project_id/:memuser_id', auth, async (req, res) => {
     req.status(500).send('Server Error');
   }
 });
+
+//@route  POST api/project/admin/:project_id/:user_id
+//@desc   make member admin
+//@access Private
+router.post('/admin/:project_id/:user_id', auth, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const user = await User.findById(req.params.user_id).select('-password');
+    if (!user) {
+      return res
+        .status(404)
+        .json({ msg: "The user you're requesting to does not exist" });
+    }
+
+    const project = await Project.findById(req.params.project_id);
+    if (!project) return res.status(400).json({ msg: 'Project Not Found' });
+
+    /* Check if User is admin */
+    let adminIndex = project.admin.map((e) => e.user).indexOf(req.user.id);
+    if (adminIndex < 0) {
+      return res.status(401).json({ msg: 'Youre not authorised' });
+    }
+
+    /* Check if toUser is already member */
+    let memberIndex = project.admin
+      .map((e) => e.user)
+      .indexOf(req.params.user_id);
+    if (memberIndex > -1) {
+      return res.status(401).json({ msg: 'User is already a admin' });
+    }
+    const member = {
+      user: req.params.user_id,
+      fullName: user.fullName,
+      status: 'Admin',
+      avatar: user.avatar,
+    };
+
+    project.admin.unshift(member);
+    await project.save();
+
+    // res.json(project.members);
+    res.json(project);
+  } catch (err) {
+    console.error(err.message);
+    req.status(500).send('Server Error');
+  }
+});
+
+//@route  DELETE api/project/admin/d/:project_id/:memuser_id
+//@desc   Remove member as admin using his user id
+//@access Private
+
+router.delete('/admin/d/:project_id/:memuser_id', auth, async (req, res) => {
+  try {
+    /* Pull out the profile and check if it exists */
+    const project = await Project.findById(req.params.project_id);
+    if (!project) {
+      return res
+        .status(404)
+        .json({ msg: 'You have not created a project yet' });
+    }
+
+    const profile = await Profile.findOne({ user: req.params.memuser_id });
+    if (!profile) {
+      return res.status(404).json({ msg: 'No Such profile exists' });
+    }
+
+    /* Check if the reqUser admin */
+    if (project.user.toString() !== req.user.id.toString()) {
+      return res.status(401).json({ msg: 'Youre not authorised' });
+    }
+
+    const removeIndex = project.admin
+      .map((member) => member.user)
+      .indexOf(req.params.memuser_id);
+
+    if (removeIndex < 0) {
+      return res.status(401).json({ msg: 'This user is not a admin' });
+    }
+
+    /* Remove the request and return */
+    project.admin.splice(removeIndex, 1);
+    await project.save();
+    res.json(project.admin);
+  } catch (err) {
+    console.error(err.message);
+    req.status(500).send('Server Error');
+  }
+});
+
+//@route  POST api/project/moderator/:project_id/:user_id
+//@desc   make member moderator
+//@access Private
+router.post('/moderator/:project_id/:user_id', auth, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const user = await User.findById(req.params.user_id).select('-password');
+    if (!user) {
+      return res
+        .status(404)
+        .json({ msg: "The user you're requesting to does not exist" });
+    }
+
+    const project = await Project.findById(req.params.project_id);
+    if (!project) return res.status(400).json({ msg: 'Project Not Found' });
+
+    /* Check if the reqUser admin */
+    let adminIndex = project.admin.map((e) => e.user).indexOf(req.user.id);
+    if (adminIndex < 0) {
+      return res.status(401).json({ msg: 'Youre not authorised' });
+    }
+
+    /* Check if toUser is already member */
+    let memberIndex = project.moderator
+      .map((e) => e.user)
+      .indexOf(req.params.user_id);
+    if (memberIndex > -1) {
+      return res.status(401).json({ msg: 'User is already moderator' });
+    }
+    const member = {
+      user: req.params.user_id,
+      fullName: user.fullName,
+      status: 'Admin',
+      avatar: user.avatar,
+    };
+
+    project.moderator.unshift(member);
+    await project.save();
+
+    res.json(project);
+  } catch (err) {
+    console.error(err.message);
+    req.status(500).send('Server Error');
+  }
+});
+
+//@route  DELETE api/project/moderator/d/:project_id/:memuser_id
+//@desc   Remove member as admin using his user id
+//@access Private
+
+router.delete(
+  '/moderator/d/:project_id/:memuser_id',
+  auth,
+  async (req, res) => {
+    try {
+      /* Pull out the profile and check if it exists */
+      const project = await Project.findById(req.params.project_id);
+      if (!project) {
+        return res
+          .status(404)
+          .json({ msg: 'You have not created a project yet' });
+      }
+
+      const profile = await Profile.findOne({ user: req.params.memuser_id });
+      if (!profile) {
+        return res.status(404).json({ msg: 'No Such profile exists' });
+      }
+
+      /* Check if the reqUser admin */
+      let adminIndex = project.admin.map((e) => e.user).indexOf(req.user.id);
+      if (adminIndex < 0) {
+        return res.status(401).json({ msg: 'Youre not authorised' });
+      }
+
+      const removeIndex = project.moderator
+        .map((member) => member.user)
+        .indexOf(req.params.memuser_id);
+
+      if (removeIndex < 0) {
+        return res.status(401).json({ msg: 'This user is not moderator' });
+      }
+
+      /* Remove the request and return */
+      project.moderator.splice(removeIndex, 1);
+      await project.save();
+      res.json(project);
+    } catch (err) {
+      console.error(err.message);
+      req.status(500).send('Server Error');
+    }
+  }
+);
 
 module.exports = router;

@@ -6,6 +6,40 @@ const ProjectSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'user',
   },
+  admin: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+      },
+      fullName: {
+        type: String,
+      },
+      status: {
+        type: String,
+      },
+      avatar: {
+        type: String,
+      },
+    },
+  ],
+  moderator: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+      },
+      fullName: {
+        type: String,
+      },
+      status: {
+        type: String,
+      },
+      avatar: {
+        type: String,
+      },
+    },
+  ],
   projectname: {
     type: String,
     required: true,
