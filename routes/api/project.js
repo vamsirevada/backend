@@ -237,7 +237,7 @@ router.get('/p/requests', auth, async (req, res) => {
 });
 
 // @route  PUT api/project/member/:project_id/:member_id
-// @desc   Accept member request using member profiule id
+// @desc   Accept member request using member profile id
 // @access Private
 router.put('/member/:project_id/:member_id', auth, async (req, res) => {
   try {
