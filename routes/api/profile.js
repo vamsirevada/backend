@@ -1933,7 +1933,7 @@ router.put('/projectrequest/:project_id', auth, async (req, res) => {
 // @route  PUT api/profile/invites/:project_id
 // @desc   Accept Project Invite
 // @access Private
-router.put('/invites/:project_id', auth, async (req, res) => {
+router.put('/invite/:project_id', auth, async (req, res) => {
   try {
     // Get the users profile and check if it exists
     const profile = await Profile.findOne({
@@ -1955,10 +1955,6 @@ router.put('/invites/:project_id', auth, async (req, res) => {
     let removeIndex = profile.invites
       .map((e) => e.invite)
       .indexOf(req.params.project_id);
-    // console.log(res.params.project_id);
-
-    // console.log(profile.invites);
-    // console.log(removeIndex);
 
     if (removeIndex < 0) {
       return res
@@ -1985,8 +1981,6 @@ router.put('/invites/:project_id', auth, async (req, res) => {
       from: project.date,
       description: project.description,
     };
-
-    // console.log(member);
 
     // Add the new buddy, save & return
     profile.invites.splice(removeIndex, 1);
