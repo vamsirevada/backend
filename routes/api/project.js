@@ -237,7 +237,7 @@ router.get('/p/requests', auth, async (req, res) => {
 });
 
 // @route  PUT api/project/member/:project_id/:member_id
-// @desc   Accept member request using member profile id
+// @desc   Accept member request using member profiule id
 // @access Private
 router.put('/member/:project_id/:member_id', auth, async (req, res) => {
   try {
@@ -543,7 +543,7 @@ router.post('/moderator/:project_id/:user_id', auth, async (req, res) => {
 });
 
 //@route  DELETE api/project/moderator/d/:project_id/:memuser_id
-//@desc   Remove member as admin using his user id
+//@desc   Remove member as moderator using his user id
 //@access Private
 
 router.delete(

@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
   fullName: {
@@ -33,12 +33,12 @@ const UserSchema = new mongoose.Schema({
   },
   resetPasswordLink: {
     data: String,
-    default: "",
+    default: '',
   },
   activityStatus: {
     type: String,
-    default: "offline",
+    default: 'offline',
   },
 });
 
-module.exports = mongoose.model("user", UserSchema);
+module.exports = mongoose.model('user', UserSchema);
