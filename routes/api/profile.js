@@ -2010,10 +2010,6 @@ router.delete('/invite/:project_id', auth, async (req, res) => {
         .json({ msg: 'You have not created a profile yet' });
     }
 
-    /* Pull out their profile and get their user */
-    // const reqProfile = await Profile.findById(req.params.profile_id);
-    // const reqUser = reqProfile.user;
-
     let removeIndex = profile.invites
       .map((e) => e.invite)
       .indexOf(req.params.project_id);
