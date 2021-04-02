@@ -71,10 +71,9 @@ router.get('/', auth, async (req, res) => {
       project: {
         $in: project_id,
       },
-    })
-      .populate('project', ['projectname'])
-      .populate('applied', ['avatar'])
-      .populate('shortlisted', ['avatar']);
+    }).populate('project', ['projectname']);
+    // .populate('applied', ['avatar'])
+    // .populate('shortlisted', ['avatar']);
 
     res.json(notice);
   } catch (err) {
@@ -135,7 +134,7 @@ router.put('/apply/:id', auth, async (req, res) => {
     }
 
     let appliedIndex = notice.applied
-      .map((x) => x.toString())
+      .map((x) => x.applicant)
       .indexOf(profile._id);
 
     if (appliedIndex > -1) {
@@ -160,10 +159,20 @@ router.put('/shortlist/:id/:profile_id', auth, async (req, res) => {
 
     const profile = await Profile.findById(req.params.profile_id);
 
-    let removeIndex = notice.applied.indexOf(profile._id);
+    let removeIndex = notice.applied
+      .map((e) => e.applicant)
+      .indexOf(profile._id);
+
+    if (removeIndex < 0) {
+      return res.status(401).json({ msg: 'This user has not applied' });
+    }
+
+    shortlistedId = {
+      shorlist: profile._id,
+    };
 
     notice.applied.splice(removeIndex, 1);
-    notice.shortlisted.unshift(profile);
+    notice.shortlisted.unshift(shortlistedId);
     await notice.save();
     res.json(notice);
   } catch (err) {
@@ -181,7 +190,7 @@ router.get('/applied/:id', auth, async (req, res) => {
     const notice = await Notice.findById(req.params.id);
 
     const profiles = await Profile.find({
-      _id: { $in: notice.applied },
+      _id: { $in: notice.applied.applicant },
     });
     res.json(profiles);
   } catch (err) {
@@ -199,7 +208,7 @@ router.get('/shortlisted/:id', auth, async (req, res) => {
     const notice = await Notice.findById(req.params.id);
 
     const profiles = await Profile.find({
-      _id: { $in: notice.shortlisted },
+      _id: { $in: notice.shortlisted.shorlist },
     });
     res.json(profiles);
   } catch (err) {

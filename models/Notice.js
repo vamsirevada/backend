@@ -29,14 +29,18 @@ const NoticeSchema = new Schema({
   },
   applied: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'profile',
+      applicant: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'profile',
+      },
     },
   ],
   shortlisted: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'profile',
+      shortlist: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'profile',
+      },
     },
   ],
 
