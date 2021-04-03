@@ -485,7 +485,7 @@ router.delete('/admin/d/:project_id/:memuser_id', auth, async (req, res) => {
     /* Remove the request and return */
     project.admin.splice(removeIndex, 1);
     await project.save();
-    res.json(project.admin);
+    res.json(project);
   } catch (err) {
     console.error(err.message);
     req.status(500).send('Server Error');
@@ -528,7 +528,7 @@ router.post('/moderator/:project_id/:user_id', auth, async (req, res) => {
     const member = {
       user: req.params.user_id,
       fullName: user.fullName,
-      status: 'Admin',
+      status: 'Moderator',
       avatar: user.avatar,
     };
 

@@ -1933,69 +1933,76 @@ router.put('/projectrequest/:project_id', auth, async (req, res) => {
 // @route  PUT api/profile/invites/:project_id
 // @desc   Accept Project Invite
 // @access Private
-router.put('/invite/:project_id', auth, async (req, res) => {
-  try {
-    // Get the users profile and check if it exists
-    const profile = await Profile.findOne({
-      user: req.user.id,
-    }).populate('user', ['fullName', 'groupName', 'userName']);
-    if (!profile) {
-      return res.status(401).json({ msg: 'You did not make your profile yet' });
+router.put(
+  '/invite/:project_id',
+  auth,
+  [check('status', 'write a status').exists()],
+  async (req, res) => {
+    try {
+      // Get the users profile and check if it exists
+      const profile = await Profile.findOne({
+        user: req.user.id,
+      }).populate('user', ['fullName', 'groupName', 'userName']);
+      if (!profile) {
+        return res
+          .status(401)
+          .json({ msg: 'You did not make your profile yet' });
+      }
+
+      // Get project and check if it exists
+      const project = await Project.findById(req.params.project_id);
+      if (!project) {
+        return res
+          .status(404)
+          .json({ msg: 'Cannot add, project does not exist' });
+      }
+
+      // Check if the Project request was sent
+      let removeIndex = profile.invites
+        .map((e) => e.invite)
+        .indexOf(req.params.project_id);
+
+      if (removeIndex < 0) {
+        return res
+          .status(401)
+          .json({ msg: 'They did not send a project request to you' });
+      }
+
+      const member = {
+        user: profile.user,
+        fullName: profile.user.fullName,
+        status: req.body.status,
+        avatar: profile.avatar,
+      };
+
+      const profileProject = {
+        project: project._id,
+        projectname: project.projectname,
+      };
+
+      const profileexp = {
+        title: member.status,
+        company: project.projectname,
+        location: project.location,
+        from: project.date,
+        description: project.description,
+      };
+
+      // Add the new buddy, save & return
+      profile.invites.splice(removeIndex, 1);
+      profile.projects.unshift(profileProject);
+      profile.experience.unshift(profileexp);
+      project.members.unshift(member);
+      await project.save();
+      await profile.save();
+
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
     }
-
-    // Get project and check if it exists
-    const project = await Project.findById(req.params.project_id);
-    if (!project) {
-      return res
-        .status(404)
-        .json({ msg: 'Cannot add, project does not exist' });
-    }
-
-    // Check if the Project request was sent
-    let removeIndex = profile.invites
-      .map((e) => e.invite)
-      .indexOf(req.params.project_id);
-
-    if (removeIndex < 0) {
-      return res
-        .status(401)
-        .json({ msg: 'They did not send a project request to you' });
-    }
-
-    const member = {
-      user: profile.user,
-      fullName: profile.user.fullName,
-      status: req.body.title,
-      avatar: profile.avatar,
-    };
-
-    const profileProject = {
-      project: project._id,
-      projectname: project.projectname,
-    };
-
-    const profileexp = {
-      title: req.body.title,
-      company: project.projectname,
-      location: project.location,
-      from: project.date,
-      description: project.description,
-    };
-
-    // Add the new buddy, save & return
-    profile.invites.splice(removeIndex, 1);
-    profile.projects.unshift(profileProject);
-    profile.experience.unshift(profileexp);
-    project.members.unshift(member);
-    await project.save();
-    await profile.save();
-
-    res.json(profile.projects);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
   }
-});
+);
 
 // @route  DELETE api/profile/invite/:project_id
 // @desc   Decline a project invite

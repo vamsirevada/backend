@@ -71,9 +71,7 @@ router.get('/', auth, async (req, res) => {
       project: {
         $in: project_id,
       },
-    }).populate('project', ['projectname']);
-    // .populate('applied', ['avatar'])
-    // .populate('shortlisted', ['avatar']);
+    }).populate('project', 'projectname');
 
     res.json(notice);
   } catch (err) {
@@ -189,9 +187,12 @@ router.get('/applied/:id', auth, async (req, res) => {
   try {
     const notice = await Notice.findById(req.params.id);
 
+    const profile_id = notice.applied.map((val) => val._id);
+
     const profiles = await Profile.find({
-      _id: { $in: notice.applied.applicant },
+      _id: { $in: profile_id },
     });
+
     res.json(profiles);
   } catch (err) {
     console.error(err.message);
@@ -207,8 +208,10 @@ router.get('/shortlisted/:id', auth, async (req, res) => {
   try {
     const notice = await Notice.findById(req.params.id);
 
+    const profile_id = notice.shortlisted.map((val) => val._id);
+
     const profiles = await Profile.find({
-      _id: { $in: notice.shortlisted.shorlist },
+      _id: { $in: profile_id },
     });
     res.json(profiles);
   } catch (err) {
