@@ -88,9 +88,9 @@ const ProfileSchema = new mongoose.Schema({
   location: {
     type: String,
   },
-  founder: {
-    type: String,
-  },
+  // founder: {
+  //   type: String,
+  // },
   founder: {
     type: [String],
   },
