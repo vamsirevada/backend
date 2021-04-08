@@ -5,7 +5,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../../models/User');
 const Writer = require('../../models/Writer');
-const Referral = require('../../models/Referral');
 
 //@route  POST api/users
 //@desc   Register user
