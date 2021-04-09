@@ -47,6 +47,7 @@ app.use('/api/project', require('./routes/api/project'));
 app.use('/api/notice', require('./routes/api/notice'));
 app.use('/api/article', require('./routes/api/article'));
 app.use('/api/password', require('./routes/api/password'));
+app.use('/api/expense', require('./routes/api/expense'));
 
 //endpoint
 // app.get('/api', (req, res) => res.send('API Running...!'));

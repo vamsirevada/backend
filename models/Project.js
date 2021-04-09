@@ -59,6 +59,12 @@ const ProjectSchema = new Schema({
       ref: 'notice',
     },
   ],
+  expenses: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'expense',
+    },
+  ],
   members: [
     {
       user: {
