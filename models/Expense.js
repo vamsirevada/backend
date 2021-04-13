@@ -6,6 +6,9 @@ const ExpenseSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'project',
   },
+  creator: {
+    type: String,
+  },
   text: {
     type: String,
   },

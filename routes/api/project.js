@@ -109,6 +109,64 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
+router.post('/:id/budget', auth, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+
+    const newBudget = {
+      text: req.body.text,
+      budget: req.body.budget,
+    };
+
+    project.projectbudget.unshift(newBudget);
+
+    await project.save();
+    res.json(project);
+  } catch (err) {
+    console.error(err.message);
+    req.status(500).send('Server Error');
+  }
+});
+
+router.get('/:id/budget', auth, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({ msg: 'You have not created project yet' });
+    }
+
+    res.json(project.projectbudget);
+  } catch (err) {
+    console.error(err.message);
+    req.status(500).send('Server Error');
+  }
+});
+
+router.delete('/:id/budget/:budget_id', auth, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res
+        .status(404)
+        .json({ msg: 'You have not created a project yet' });
+    }
+
+    let removeIndex = project.projectbudget
+      .map((e) => e._id)
+      .indexOf(req.params.budget_id);
+
+    project.projectbudget.splice(removeIndex, 1);
+    await project.save();
+    res.json({
+      msg: 'Budget has been deleted',
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
 // @route  PUT api/project/invites/:project_id/:profile_id
 // @desc   Send a invites using profile id
 // @access Private

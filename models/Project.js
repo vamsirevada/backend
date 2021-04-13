@@ -53,6 +53,16 @@ const ProjectSchema = new Schema({
   creator: {
     type: String,
   },
+  projectbudget: [
+    {
+      text: {
+        type: String,
+      },
+      budget: {
+        type: Number,
+      },
+    },
+  ],
   notices: [
     {
       type: mongoose.Schema.Types.ObjectId,

@@ -10,6 +10,7 @@ router.post('/:id', auth, async (req, res) => {
 
     const newExpense = new Expense({
       project: project.id,
+      creator: req.user.id,
       text: req.body.text,
       amount: req.body.amount,
     });
