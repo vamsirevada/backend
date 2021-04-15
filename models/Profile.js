@@ -126,22 +126,21 @@ const ProfileSchema = new mongoose.Schema({
     {
       title: {
         type: String,
-        required: true,
       },
       project: {
         type: String,
-        // required: true,
+      },
+      projectavatar: {
+        type: String,
       },
       company: {
         type: String,
-        required: true,
       },
       location: {
         type: String,
       },
       from: {
         type: Date,
-        required: true,
       },
       to: {
         type: Date,
