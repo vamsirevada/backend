@@ -9,41 +9,37 @@ const User = require('../../models/User');
 //@route  POST api/posts
 //@desc   Create a post
 //@access Private
-router.post(
-  '/',
-  [auth, [check('text', 'Text is required').not().isEmpty()]],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    try {
-      const user = await User.findById(req.user.id).select('-password');
-
-      const profile = await Profile.findOne({ user: req.user.id });
-
-      const newPost = new Post({
-        text: req.body.text,
-        title: req.body.title,
-        url: req.body.url,
-        link: req.body.link,
-        type: req.body.type,
-        fullName: user.fullName,
-        groupName: user.groupName,
-        avatar: profile.avatar,
-        userName: user.userName,
-        user: req.user.id,
-      });
-
-      const post = await newPost.save();
-      res.json(post);
-    } catch (err) {
-      console.error(err.message);
-      req.status(500).send('Server Error');
-    }
+router.post('/', auth, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
-);
+
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+
+    const profile = await Profile.findOne({ user: req.user.id });
+
+    const newPost = new Post({
+      text: req.body.text,
+      title: req.body.title,
+      url: req.body.url,
+      link: req.body.link,
+      type: req.body.type,
+      fullName: user.fullName,
+      groupName: user.groupName,
+      avatar: profile.avatar,
+      userName: user.userName,
+      user: req.user.id,
+    });
+
+    const post = await newPost.save();
+    res.json(post);
+  } catch (err) {
+    console.error(err.message);
+    req.status(500).send('Server Error');
+  }
+});
 
 //@route  GET api/posts
 //@desc   Get all post
