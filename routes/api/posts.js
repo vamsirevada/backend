@@ -27,6 +27,7 @@ router.post(
         text: req.body.text,
         title: req.body.title,
         url: req.body.url,
+        link: req.body.link,
         type: req.body.type,
         fullName: user.fullName,
         groupName: user.groupName,

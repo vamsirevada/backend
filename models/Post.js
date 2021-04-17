@@ -28,6 +28,9 @@ const PostSchema = new Schema({
   url: {
     type: String,
   },
+  link: {
+    type: String,
+  },
   type: {
     type: String,
   },
