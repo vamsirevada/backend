@@ -1737,7 +1737,7 @@ router.put(
       }
 
       const note = {
-        user: toUser,
+        user: notePost.user._id,
         post: req.params.post_id,
         fullName: notePost.fullName,
         groupName: notePost.groupName,
@@ -1776,8 +1776,8 @@ router.delete('/unnote/post/:post_id', auth, async (req, res) => {
     let noteIndex = profile.postnote
       .map((notepost) => notepost.post)
       .indexOf(req.params.post_id);
-    if (noteIndex > -1) {
-      return res.status(401).json({ msg: 'You noted this post' });
+    if (noteIndex < 0) {
+      return res.status(401).json({ msg: 'You already unnoted this post' });
     }
 
     //Get remove index
