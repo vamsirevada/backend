@@ -1,11 +1,8 @@
-const nodeMailer = require("nodemailer");
+const nodeMailer = require('nodemailer');
 
 exports.sendEmail = (emailData) => {
   const transporter = nodeMailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 587,
-    secure: false,
-    requireTLS: true,
+    service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
