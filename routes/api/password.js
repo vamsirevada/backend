@@ -47,6 +47,7 @@ router.put(
         if (err) {
           return res.json({ message: err });
         } else {
+          console.log(success);
           sendEmail(emailData);
           return res.status(200).json({
             message: `Email has been sent to ${email}. Follow the instructions to reset your password.`,
