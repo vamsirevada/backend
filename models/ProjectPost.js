@@ -6,9 +6,15 @@ const ProjectPostSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'project',
   },
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+  },
+  avatar: {
+    type: String,
+  },
   text: {
     type: String,
-    required: true,
   },
   title: {
     type: String,
@@ -23,6 +29,9 @@ const ProjectPostSchema = new Schema({
     type: String,
   },
   url: {
+    type: String,
+  },
+  link: {
     type: String,
   },
   type: {
