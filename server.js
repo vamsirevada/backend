@@ -50,4 +50,4 @@ app.use('/api/password', require('./routes/api/password'));
 app.use('/api/expense', require('./routes/api/expense'));
 
 //endpoint
-// app.get('/api', (req, res) => res.send('API Running...!'));
+app.get('/api', (req, res) => res.send('API Running...!'));
