@@ -6,6 +6,23 @@ const Project = require('../../models/Project');
 const Notice = require('../../models/Notice');
 const Profile = require('../../models/Profile');
 
+//@route  GET api/notice/all
+//@desc   Get all notices
+//@access Public
+
+router.get('/all', auth, async (req, res) => {
+  try {
+    const notices = await Notice.find().populate(
+      'project',
+      'projectname avatar creator'
+    );
+    res.json(notices);
+  } catch (err) {
+    console.error(err.message);
+    req.status(500).send('Server Error');
+  }
+});
+
 //@route  POST api/notice/:project_id
 //@desc   Create or update notice
 //@access Private
