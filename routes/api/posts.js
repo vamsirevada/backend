@@ -199,7 +199,9 @@ router.put('/like/:id', auth, async (req, res) => {
     const postLikeBody = await User.findById(req.user.id).select('-password');
     const postLikes = {
       user: req.user.id,
-      fullName: postLikeBody.fullName,
+      fullName: postLikeBody.fullName
+        ? postLikeBody.fullName
+        : postLikeBody.groupName,
       avatar: postLikeBody.avatar,
       // displayLBtn: displayLBtn,
     };
