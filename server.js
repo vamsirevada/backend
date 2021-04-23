@@ -1,23 +1,28 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const https = require('https');
+const fs = require('fs');
+const privateKey = fs.readFileSync('/etc/ssl/certs/vanity_ac_private.key');
+const certificate = fs.readFileSync('/etc/ssl/certs/vanity_ac.crt');
+
+const credentials = {
+  key: privateKey,
+  cert: certificate,
+};
+
+const httpsServer = https.createServer(credentials, app);
+
+httpsServer.listen(PORT, () => console.log(`Server Started on port ${PORT}`));
 
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`Server Started on port ${PORT}`));
+// app.listen(PORT, () => console.log(`Server Started on port ${PORT}`));
 
-app.use(
-  bodyParser.urlencoded({
-    extended: false,
-  })
-);
-
-app.use(bodyParser.json());
 app.use(express.json({}));
 app.use(cors());
 
