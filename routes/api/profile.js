@@ -109,6 +109,7 @@ router.get('/', auth, async (req, res) => {
       'userName',
       'groupName',
       'avatar',
+      'activityStatus',
     ]);
     res.json(profiles);
   } catch (err) {
@@ -131,6 +132,7 @@ router.get('/user/:user_id', async (req, res) => {
       'userName',
       'isGroup',
       'avatar',
+      'activityStatus',
     ]);
 
     if (!profile) return res.status(400).json({ msg: 'Profile Not Found' });
@@ -1593,7 +1595,12 @@ router.get('/buddyProfiles/:id', auth, async (req, res) => {
     }
     const profiles = await Profile.find({
       user: { $in: profile.buddies },
-    }).populate('user', ['fullName', 'groupName', 'userName']);
+    }).populate('user', [
+      'fullName',
+      'groupName',
+      'userName',
+      'activityStatus',
+    ]);
     res.json(profiles);
   } catch (err) {
     console.error(err.message);
