@@ -78,7 +78,14 @@ router.post('/', [auth], async (req, res) => {
         { user: req.user.id },
         { $set: profileFields },
         { new: true }
-      );
+      ).populate('user', [
+        'userName',
+        'fullName',
+        'groupName',
+        'isGroup',
+        'avatar',
+        'activityStatus',
+      ]);
 
       await User.findByIdAndUpdate(
         { _id: req.user.id },
@@ -328,15 +335,8 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const {
-      school,
-      degree,
-      fieldofstudy,
-      from,
-      to,
-      current,
-      description,
-    } = req.body;
+    const { school, degree, fieldofstudy, from, to, current, description } =
+      req.body;
 
     const newEdu = {
       school,
@@ -384,15 +384,8 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const {
-      school,
-      degree,
-      fieldofstudy,
-      from,
-      to,
-      current,
-      description,
-    } = req.body;
+    const { school, degree, fieldofstudy, from, to, current, description } =
+      req.body;
 
     //Build Profile object
 
@@ -1364,9 +1357,10 @@ router.put('/request/:profile_id', auth, async (req, res) => {
     }
 
     /* Pull out profile theyre requesting to and check if it exists */
-    const toProfile = await Profile.findById(
-      req.params.profile_id
-    ).populate('user', ['fullName', 'groupName', 'userName']);
+    const toProfile = await Profile.findById(req.params.profile_id).populate(
+      'user',
+      ['fullName', 'groupName', 'userName']
+    );
     if (!toProfile) {
       return res
         .status(404)
@@ -1620,9 +1614,10 @@ router.put('/note/:profile_id', auth, async (req, res) => {
     }
 
     // Get their profile and check if their profile exists
-    const noteProfile = await Profile.findById(
-      req.params.profile_id
-    ).populate('user', ['fullName', 'groupName', 'userName']);
+    const noteProfile = await Profile.findById(req.params.profile_id).populate(
+      'user',
+      ['fullName', 'groupName', 'userName']
+    );
     if (!noteProfile) {
       return res
         .status(404)
@@ -1880,9 +1875,10 @@ router.put('/projectrequest/:project_id', auth, async (req, res) => {
     const fromUser = await User.findById(fromProfile.user);
 
     /* Pull out project theyre requesting to and check if it exists */
-    const toProject = await Project.findById(
-      req.params.project_id
-    ).populate('user', ['fullName', 'groupName', 'userName']);
+    const toProject = await Project.findById(req.params.project_id).populate(
+      'user',
+      ['fullName', 'groupName', 'userName']
+    );
     if (!toProject) {
       return res
         .status(404)
