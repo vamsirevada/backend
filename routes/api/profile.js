@@ -2050,4 +2050,21 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+router.get('/status', auth, async (req, res) => {
+  try {
+    await Profile.findOneAndUpdate(
+      { user: req.user.id },
+      {
+        $set: { progressStatus: true },
+      }
+    );
+
+    res.json({
+      message: 'Profile Completed!',
+    });
+  } catch (error) {
+    console.error(error.message);
+  }
+});
+
 module.exports = router;

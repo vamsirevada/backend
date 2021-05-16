@@ -289,6 +289,9 @@ const ProfileSchema = new mongoose.Schema({
       },
     },
   ],
+  progressStatus: {
+    type: Boolean,
+  },
   date: {
     type: Date,
     default: Date.now,
